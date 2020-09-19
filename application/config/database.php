@@ -78,8 +78,8 @@ $db['default'] = array(
 	'hostname' => 'localhost',
 	'username' => '',
 	'password' => '',
-	'database' => '',
-	'dbdriver' => 'mysqli',
+	'database' => './database.sqlite3', // <-- *** Change this to your database file (must be readable & writable and in a readable & writable directory) ***
+	'dbdriver' => 'sqlite3',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
 	'db_debug' => (ENVIRONMENT !== 'production'),
@@ -92,5 +92,5 @@ $db['default'] = array(
 	'compress' => FALSE,
 	'stricton' => FALSE,
 	'failover' => array(),
-	'save_queries' => TRUE
+	'save_queries' => FALSE
 );
