@@ -1,3 +1,8 @@
+/database.sqlite3
+/database.sqlite3-journal
+/database.sqlite3-wal
+/database.sqlite3-shm
+
 .DS_Store
 
 application/cache/*
@@ -20,6 +25,7 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 #-------------------------
 /nbproject/
 .idea/*
+.vscode
 
 ## Sublime Text cache files
 *.tmlanguage.cache
