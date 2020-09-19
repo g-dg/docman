@@ -9,6 +9,8 @@ class Browse extends CI_Controller {
 	 */
 	public function index()
 	{
+		$this->load->library('session');
+
 		$path_array = func_get_args();
 		for ($i = 0; $i < count($path_array); $i++) {
 			$path_array[$i] = rawurldecode($path_array[$i]);
