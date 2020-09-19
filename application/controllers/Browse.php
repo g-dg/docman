@@ -9,6 +9,7 @@ class Browse extends CI_Controller {
 	 */
 	public function index()
 	{
+		db_connect($this);
 		$this->load->library('session');
 
 		$path_array = func_get_args();
@@ -16,6 +17,6 @@ class Browse extends CI_Controller {
 			$path_array[$i] = rawurldecode($path_array[$i]);
 		}
 
-
+		
 	}
 }

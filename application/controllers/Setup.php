@@ -8,12 +8,12 @@ class Setup extends CI_Controller {
 	 */
 	public function index()
 	{
+		db_connect($this);
 		$this->config->load('setup');
 
 		$default_username = $this->config->item('docman_default_username');
 		$default_password = $this->config->item('docman_default_password');
 
 		
-
 	}
 }
