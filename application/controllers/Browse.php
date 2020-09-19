@@ -5,7 +5,7 @@ class Browse extends CI_Controller {
 
 	/**
 	 * Main browse page
-	 * Parameters are each part of the path
+	 * Each part of the requested path is specified in each parameter
 	 */
 	public function index()
 	{
@@ -13,5 +13,7 @@ class Browse extends CI_Controller {
 		for ($i = 0; $i < count($path_array); $i++) {
 			$path_array[$i] = rawurldecode($path_array[$i]);
 		}
+
+
 	}
 }
