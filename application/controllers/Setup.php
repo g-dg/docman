@@ -14,6 +14,9 @@ class Setup extends CI_Controller {
 		$default_username = $this->config->item('docman_default_username');
 		$default_password = $this->config->item('docman_default_password');
 
-		
+		$create_db_sql = file('./resources/database_schema.min.sql');
+		foreach ($create_db_sql as $sql) {
+			$this->db->simple_query($sql);
+		}
 	}
 }
