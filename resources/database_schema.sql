@@ -7,6 +7,7 @@ BEGIN TRANSACTION;
 
 PRAGMA user_version = 1;
 
+DROP TABLE IF EXISTS "search_index";
 DROP TABLE IF EXISTS "favourites";
 DROP TABLE IF EXISTS "file_history";
 DROP TABLE IF EXISTS "tagged_files";
