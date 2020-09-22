@@ -14,7 +14,7 @@ DROP TABLE IF EXISTS "users";
 DROP TABLE IF EXISTS "ci_sessions";
 CREATE TABLE "ci_sessions"("id" TEXT PRIMARY KEY NOT NULL,"ip_address" TEXT NOT NULL,"timestamp" INTEGER DEFAULT 0 NOT NULL,"data" TEXT DEFAULT '' NOT NULL);
 CREATE INDEX "ci_sessions_timestamp" ON "ci_sessions"("timestamp");
-CREATE TABLE "users"("id" INTEGER PRIMARY KEY NOT NULL,"guid" TEXT NOT NULL,"username" TEXT NOT NULL UNIQUE,"password" TEXT,"type" INTEGER NOT NULL,"full_name" TEXT,"last_password_change" INTEGER,"settings" TEXT);
+CREATE TABLE "users"("id" INTEGER PRIMARY KEY NOT NULL,"username" TEXT NOT NULL UNIQUE,"password" TEXT,"type" INTEGER NOT NULL,"full_name" TEXT,"last_password_change" INTEGER,"settings" TEXT);
 CREATE TABLE "logins"("id" INTEGER PRIMARY KEY NOT NULL,"user_id" INTEGER NOT NULL REFERENCES "users","client_addr" TEXT,"user_agent" TEXT"login_time" INTEGER NOT NULL DEFAULT(STRFTIME('%s', 'now')),"last_used" INTEGER NOT NULL);
 CREATE TABLE "groups"("id" INTEGER PRIMARY KEY NOT NULL,"name" TEXT NOT NULL UNIQUE);
 CREATE TABLE "users_in_groups"("user_id" INTEGER NOT NULL,"group_id" INTEGER NOT NULL,UNIQUE("user_id", "group_id"));

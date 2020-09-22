@@ -7,27 +7,12 @@ BEGIN TRANSACTION;
 
 PRAGMA user_version = 1;
 
-DROP TABLE IF EXISTS "search_index";
-DROP TABLE IF EXISTS "favourites";
-DROP TABLE IF EXISTS "file_history";
-DROP TABLE IF EXISTS "tagged_files";
-DROP TABLE IF EXISTS "tags";
-DROP TABLE IF EXISTS "file_permissions";
-DROP TABLE IF EXISTS "files";
-DROP TABLE IF EXISTS "mountpoints";
-DROP TABLE IF EXISTS "users_in_groups";
-DROP TABLE IF EXISTS "groups";
-DROP TABLE IF EXISTS "logins";
-DROP TABLE IF EXISTS "users";
-DROP TABLE IF EXISTS "ci_sessions";
-
 -- CodeIgniter sessions table
 CREATE TABLE "ci_sessions"("id" TEXT PRIMARY KEY NOT NULL,"ip_address" TEXT NOT NULL,"timestamp" INTEGER DEFAULT 0 NOT NULL,"data" TEXT DEFAULT '' NOT NULL);CREATE INDEX "ci_sessions_timestamp" ON "ci_sessions"("timestamp");
 
 -- Stores users
 CREATE TABLE "users" (
 	"id" INTEGER PRIMARY KEY NOT NULL,
-	"guid" TEXT NOT NULL, -- reserved for future account synchronization system
 	"username" TEXT NOT NULL UNIQUE, -- username used to log in
 	"password" TEXT, -- hashed password
 	"type" INTEGER NOT NULL, -- 0: administrator, 1: standard user, 2: guest
