@@ -7,13 +7,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 function db_connect($this_obj)
 {
-	$this_obj->load->database();
+	static $connected = false;
 
-	$this_obj->db->simple_query('PRAGMA journal_mode=WAL;');
-	$this_obj->db->simple_query('PRAGMA synchronous=NORMAL;');
+	if (!$connected) {
+		$this_obj->load->database();
 
-	//$this_obj->db->simple_query('PRAGMA temp_store=MEMORY;');
-	//$this_obj->db->simple_query('PRAGMA cache_size=-16384');
+		$this_obj->db->simple_query('PRAGMA journal_mode=WAL;');
+		$this_obj->db->simple_query('PRAGMA synchronous=NORMAL;');
 
-	$this_obj->db->simple_query('PRAGMA foreign_keys = ON;');
+		//$this_obj->db->simple_query('PRAGMA temp_store=MEMORY;');
+		//$this_obj->db->simple_query('PRAGMA cache_size=-16384');
+
+		$this_obj->db->simple_query('PRAGMA foreign_keys = ON;');
+
+		$connected = true;
+	}
 }
