@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Log In - Garnet DeGelder's DocMan <?=DOCMAN_VERSION?></title>
+</head>
+<body>
+	<form action="<?=rtrim(html_escape($this->config->site_url()), '/')?>/login/login" method="POST">
+		<input name="_csrf_token" value="<?=html_escape($_SESSION['_csrf_token'])?>" type="hidden" />
+		<h1>Log In - Garnet DeGelder's DocMan <?=DOCMAN_VERSION?></h1>
+		<label for="username">Username:</label>
+		<input id="username" name="username" type="text" />
+		<br />
+		<label for="password">Password:</label>
+		<input id="password" name="password" type="password" />
+		<br />
+		<input type="submit" value="Log In" />
+	</form>
+</body>
+</html>
