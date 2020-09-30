@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"password" TEXT, -- hashed password
 	"type" INTEGER NOT NULL, -- 0: administrator, 1: standard user, 2: guest
 	"full_name" TEXT, -- User's full name (only used for display)
-	"last_password_change" INTEGER, -- last password change (if null, they must change their password at login)
+	"last_password_change" INTEGER, -- last password change
 	"settings" TEXT -- JSON object containing user settings
 );
 
