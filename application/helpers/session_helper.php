@@ -10,7 +10,7 @@ function setup_session()
 	$CI =& get_instance();
 	$CI->load->library('session');
 
-	if (!isset($_SESSION['_csrf_token'])) {
-		$_SESSION['_csrf_token'] = hash('sha512', $CI->security->get_random_bytes(256));
+	if (!isset($_SESSION['docman_csrf_token'])) {
+		$_SESSION['docman_csrf_token'] = hash('sha512', $CI->security->get_random_bytes(256));
 	}
 }
