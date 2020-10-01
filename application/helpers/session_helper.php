@@ -11,6 +11,26 @@ function setup_session()
 	$CI->load->library('session');
 
 	if (!isset($_SESSION['docman_csrf_token'])) {
-		$_SESSION['docman_csrf_token'] = hash('sha512', $CI->security->get_random_bytes(256));
+		$_SESSION['docman_csrf_token'] = hash('sha512', $CI->security->get_random_bytes(4096));
 	}
+}
+
+/**
+ * Checks the CSRF token
+ * Note: this does not yet prevent timing attacks.
+ * @param csrf_token The token to check against
+ * @return bool Whether the check passed
+ */
+function check_csrf_token($csrf_token) {
+	setup_session();
+	return ($csrf_token === $_SESSION['docman_csrf_token']);
+}
+
+/**
+ * Gets the CSRF token
+ * @return string the CSRF token
+ */
+function get_csrf_token() {
+	setup_session();
+	return $_SESSION['docman_csrf_token'];
 }
