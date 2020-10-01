@@ -3,7 +3,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Authentication
 {
-
 	private $CI;
 
 	public function __construct()
@@ -21,7 +20,7 @@ class Authentication
 
 		if (isset($_SESSION['docman_login_id'])) {
 			// check if login is valid (i.e. if the user has not logged out of all other locations)
-			if ((int)($this->CI->db->query('SELECT COUNT() AS "count" FROM "logins" WHERE "login_id" = ?;')->row_array()['count']) == 1) {
+			if ((int)($this->CI->db->query('SELECT COUNT() AS "count" FROM "logins" WHERE "id" = ?;', [$_SESSION['docman_login_id']])->row_array()['count']) == 1) {
 				// update "last_used" of login table
 				$time = time();
 				// we don't want to lock the database for writing every second for each login
@@ -29,10 +28,10 @@ class Authentication
 				return true;
 			}
 		}
-		$_SESSION['docman_login_redirect'] = is_null($target_url) ? $_SERVER['REQUEST_URI'] : rtrim($this->config->site_url(), '/') . $target_url;
 
+		//$_SESSION['docman_login_redirect'] = is_null($target_url) ? $_SERVER['REQUEST_URI'] : rtrim($this->config->site_url(), '/') . $target_url;
 		$this->CI->load->helper('url');
-		redirect(html_escape(rtrim($this->config->site_url(), '/')) . '/login/', 'location', 303);
+		redirect(html_escape(rtrim($this->CI->config->site_url(), '/')) . '/login/', 'location', 303);
 		return false;
 	}
 
