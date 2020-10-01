@@ -6,8 +6,8 @@
 	<title>Log In - Garnet DeGelder's DocMan <?=DOCMAN_VERSION?></title>
 </head>
 <body>
-	<form action="<?=rtrim(html_escape($this->config->site_url()), '/')?>/login/login" method="POST">
-		<input name="_csrf_token" value="<?=html_escape($_SESSION['_csrf_token'])?>" type="hidden" />
+	<form action="<?= rtrim(html_escape($this->config->site_url()), '/') ?>/login/do_login" method="POST">
+		<input name="_csrf_token" value="<?= html_escape(get_csrf_token()) ?>" type="hidden" />
 		<h1>Log In - Garnet DeGelder's DocMan <?=DOCMAN_VERSION?></h1>
 		<label for="username">Username:</label>
 		<input id="username" name="username" type="text" />
@@ -16,6 +16,7 @@
 		<input id="password" name="password" type="password" />
 		<br />
 		<input type="submit" value="Log In" />
+		<?= isset($_SESSION['docman_login_result']) ? html_escape($_SESSION['docman_login_result']) : '' ?>
 	</form>
 </body>
 </html>
