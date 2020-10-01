@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS "logins" (
 	"id" INTEGER PRIMARY KEY NOT NULL,
 	"user_id" INTEGER NOT NULL REFERENCES "users",
 	"client_addr" TEXT,
-	"user_agent" TEXT
+	"user_agent" TEXT,
 	"login_time" INTEGER NOT NULL DEFAULT (STRFTIME('%s', 'now')),
 	"last_used" INTEGER NOT NULL
 );

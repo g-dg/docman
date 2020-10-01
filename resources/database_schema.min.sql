@@ -2,7 +2,7 @@ PRAGMA user_version = 1;
 CREATE TABLE IF NOT EXISTS "ci_sessions"("id" TEXT PRIMARY KEY NOT NULL,"ip_address" TEXT NOT NULL,"timestamp" INTEGER DEFAULT 0 NOT NULL,"data" TEXT DEFAULT '' NOT NULL);
 CREATE INDEX IF NOT EXISTS "ci_sessions_timestamp" ON "ci_sessions"("timestamp");
 CREATE TABLE IF NOT EXISTS "users"("id" INTEGER PRIMARY KEY NOT NULL,"username" TEXT NOT NULL UNIQUE,"password" TEXT,"type" INTEGER NOT NULL,"full_name" TEXT,"last_password_change" INTEGER,"settings" TEXT);
-CREATE TABLE IF NOT EXISTS "logins"("id" INTEGER PRIMARY KEY NOT NULL,"user_id" INTEGER NOT NULL REFERENCES "users","client_addr" TEXT,"user_agent" TEXT"login_time" INTEGER NOT NULL DEFAULT(STRFTIME('%s', 'now')),"last_used" INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS "logins"("id" INTEGER PRIMARY KEY NOT NULL,"user_id" INTEGER NOT NULL REFERENCES "users","client_addr" TEXT,"user_agent" TEXT, "login_time" INTEGER NOT NULL DEFAULT(STRFTIME('%s', 'now')),"last_used" INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS "groups"("id" INTEGER PRIMARY KEY NOT NULL,"name" TEXT NOT NULL UNIQUE);
 CREATE TABLE IF NOT EXISTS "users_in_groups"("user_id" INTEGER NOT NULL,"group_id" INTEGER NOT NULL,UNIQUE("user_id", "group_id"));
 CREATE TABLE IF NOT EXISTS "mountpoints"("id" INTEGER PRIMARY KEY NOT NULL,"destination_path" TEXT NOT NULL UNIQUE,"driver" TEXT NOT NULL,"driver_options" TEXT);
