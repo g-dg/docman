@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS "files" (
 	"path_in_mountpoint" TEXT NOT NULL, -- path inside of the mountpoint
 	"display_name" TEXT -- human-friendly display name
 	"type" INTEGER NOT NULL DEFAULT 0, -- type of file; 0: file, 1: directory
+	"owner_user_id" INTEGER NOT NULL REFERENCES "users"  -- the user that can change owner or permissions
 	"mountpoint_driver_info" TEXT NOT NULL, -- JSON object with file information stored by fs driver
 	UNIQUE("mountpoint_id", "path_in_mountpoint")
 );
@@ -68,7 +69,6 @@ CREATE TABLE IF NOT EXISTS "file_permissions" (
 	"id" INTEGER PRIMARY KEY NOT NULL,
 	"file_id" INTEGER NOT NULL REFERENCES "files",
 	"group_id" INTEGER NOT NULL REFERENCES "groups", -- the group that has access set
-	"owner_user_id" INTEGER REFERENCES "users", -- the user that can change owner or permissions
 	"read" INTEGER NOT NULL, -- boolean whether the group can read the file
 	"write" INTEGER NOT NULL, -- boolean whether the group can modify the file
 	"share" INTEGER NOT NULL, -- boolean whether the group can share the file to another user
