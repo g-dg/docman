@@ -1,7 +1,8 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Browse extends CI_Controller {
+class Browse extends CI_Controller
+{
 
 	/**
 	 * Main browse page
