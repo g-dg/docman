@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS "files" (
 	"mountpoint_id" INTEGER NOT NULL REFERENCES "mountpoints", -- which mountpoint this file is part of
 	"path_in_mountpoint" TEXT NOT NULL, -- path inside of the mountpoint
 	"display_name" TEXT -- human-friendly display name
-	"type" INTEGER NOT NULL DEFAULT 0, -- type of file; 0: file, 1: directory
+	"type" INTEGER, -- type of file; 0: file, 1: directory
 	"owner_user_id" INTEGER NOT NULL REFERENCES "users", -- the user that can change owner or permissions
 	"mountpoint_driver_info" TEXT NOT NULL, -- JSON object with file information stored by fs driver
 	UNIQUE("mountpoint_id", "path_in_mountpoint")

@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS "logins"("id" INTEGER PRIMARY KEY NOT NULL,"user_id" 
 CREATE TABLE IF NOT EXISTS "groups"("id" INTEGER PRIMARY KEY NOT NULL,"name" TEXT NOT NULL UNIQUE);
 CREATE TABLE IF NOT EXISTS "users_in_groups"("user_id" INTEGER NOT NULL,"group_id" INTEGER NOT NULL,UNIQUE("user_id", "group_id"));
 CREATE TABLE IF NOT EXISTS "mountpoints"("id" INTEGER PRIMARY KEY NOT NULL,"destination_path" TEXT NOT NULL UNIQUE,"driver" TEXT NOT NULL,"driver_options" TEXT);
-CREATE TABLE IF NOT EXISTS "files"("id" INTEGER PRIMARY KEY NOT NULL,"mountpoint_id" INTEGER NOT NULL REFERENCES "mountpoints","path_in_mountpoint" TEXT NOT NULL,"display_name" TEXT"type" INTEGER NOT NULL DEFAULT 0,"owner_user_id" INTEGER REFERENCES "users","mountpoint_driver_info" TEXT NOT NULL,UNIQUE("mountpoint_id", "path_in_mountpoint"));
+CREATE TABLE IF NOT EXISTS "files"("id" INTEGER PRIMARY KEY NOT NULL,"mountpoint_id" INTEGER NOT NULL REFERENCES "mountpoints","path_in_mountpoint" TEXT NOT NULL,"display_name" TEXT"type" INTEGER,"owner_user_id" INTEGER REFERENCES "users","mountpoint_driver_info" TEXT NOT NULL,UNIQUE("mountpoint_id", "path_in_mountpoint"));
 CREATE TABLE IF NOT EXISTS "file_permissions"("id" INTEGER PRIMARY KEY NOT NULL,"file_id" INTEGER NOT NULL REFERENCES "files","group_id" INTEGER NOT NULL REFERENCES "groups","read" INTEGER NOT NULL,"write" INTEGER NOT NULL,"share" INTEGER NOT NULL,"expires" INTEGER);
 CREATE TABLE IF NOT EXISTS "tags"("id" INTEGER PRIMARY KEY NOT NULL,"name" TEXT NOT NULL UNIQUE,"description" TEXT);
 CREATE TABLE IF NOT EXISTS "tagged_files"("file_id" INTEGER NOT NULL REFERENCES "files","tag_id" INTEGER NOT NULL REFERENCES "tags",PRIMARY KEY("file_id", "tag_id"));
