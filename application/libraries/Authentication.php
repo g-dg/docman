@@ -96,4 +96,47 @@ class Authentication
 		log_message('info', 'Attempted to log in as non-existent user "' . $username . '".');
 		return null;
 	}
+
+	/**
+	 * Gets the currently logged in user id
+	 * @return int currently logged in user id, null if not logged in
+	 */
+	public function get_current_user_id()
+	{
+		setup_session();
+
+		if (isset($_SESSION['docman_login_id'])) {
+			$logins = $this->CI->db->query('SELECT "user_id" FROM "logins" WHERE "id" = ?;', [$_SESSION['docman_login_id']])->result_array();
+			if (isset($logins[0])) {
+				return (int)$logins[0]['user_id'];
+			} else {
+				log_message('error', 'Attempted to get user id of non-existent login id #' . $_SESSION['docman_login_id'] . '. (Login is probably no longer valid.)');
+				return null;
+			}
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Gets the groups that a user is in.
+	 */
+	public function get_current_user_groups()
+	{
+		$user_id = $this->get_current_user_id();
+		if (is_null($user_id)) {
+			log_message('error', 'Attempted to get groups of current user while not logged in.');
+			return null;
+		}
+
+		$groups_res = $this->CI->db->query('SELECT "group_id" FROM "users_in_groups" WHERE "user_id" = ?;', [$user_id]);
+
+		$groups = [];
+
+		foreach ($groups_res as $group) {
+			$groups[] = (int)$group['group_id'];
+		}
+
+		return $groups;
+	}
 }
