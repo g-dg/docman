@@ -147,15 +147,15 @@ class FilesystemDummyDriver implements IFilesystemDriver
 	}
 	public function file_exists($filename)
 	{
-		return true;
+		return false;
 	}
 	public function filemtime($filename)
 	{
-		return time();
+		return false;
 	}
 	public function filesize($filename)
 	{
-		return 0;
+		return false;
 	}
 	public function filetype($filename)
 	{
@@ -163,7 +163,7 @@ class FilesystemDummyDriver implements IFilesystemDriver
 	}
 	public function filecount($directory)
 	{
-		return 0;
+		return false;
 	}
 	public function is_readable($filename)
 	{
