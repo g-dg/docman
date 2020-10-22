@@ -119,6 +119,26 @@ class Authentication
 	}
 
 	/**
+	 * Gets the currently logged in username
+	 */
+	public function get_current_username()
+	{
+		setup_session();
+
+		if (isset($_SESSION['docman_login_id'])) {
+			$logins = $this->CI->db->query('SELECT "users"."username" AS "username" FROM "users" INNER JOIN "logins" ON "logins"."user_id" = "users"."id" WHERE "logins".id" = ?;', [$_SESSION['docman_login_id']])->result_array();
+			if (isset($logins[0])) {
+				return $logins[0]['username'];
+			} else {
+				log_message('error', 'Attempted to get username from non-existent login id #' . $_SESSION['docman_login_id'] . '. (Login is probably no longer valid.)');
+				return null;
+			}
+		} else {
+			return null;
+		}
+	}
+
+	/**
 	 * Gets the groups that a user is in.
 	 */
 	public function get_current_user_groups()
