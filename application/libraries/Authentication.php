@@ -126,11 +126,38 @@ class Authentication
 		setup_session();
 
 		if (isset($_SESSION['docman_login_id'])) {
-			$logins = $this->CI->db->query('SELECT "users"."username" AS "username" FROM "users" INNER JOIN "logins" ON "logins"."user_id" = "users"."id" WHERE "logins".id" = ?;', [$_SESSION['docman_login_id']])->result_array();
+			$logins = $this->CI->db->query('SELECT "users"."id" AS "user_id", "users"."username" AS "username" FROM "users" INNER JOIN "logins" ON "logins"."user_id" = "users"."id" WHERE "logins".id" = ?;', [$_SESSION['docman_login_id']])->result_array();
 			if (isset($logins[0])) {
 				return $logins[0]['username'];
 			} else {
 				log_message('error', 'Attempted to get username from non-existent login id #' . $_SESSION['docman_login_id'] . '. (Login is probably no longer valid.)');
+				return null;
+			}
+		} else {
+			return null;
+		}
+	}
+
+	public function get_current_user_type()
+	{
+		setup_session();
+
+		if (isset($_SESSION['docman_login_id'])) {
+			$logins = $this->CI->db->query('SELECT "users"."id" AS "user_id", "users"."type" AS "user_type" FROM "users" INNER JOIN "logins" ON "logins"."user_id" = "users"."id" WHERE "logins".id" = ?;', [$_SESSION['docman_login_id']])->result_array();
+			if (isset($logins[0])) {
+				switch ((int)$logins[0]['user_type']) {
+					case 0:
+						return 'admin';
+					case 1:
+						return 'standard';
+					case 2:
+						return 'guest';
+					default:
+						log_message('error', 'Invalid user type: "' . $logins[0]['user_type'] . '" for user id "' . $logins[0]['user_id'] . '".');
+						break;
+				}
+			} else {
+				log_message('error', 'Attempted to get user type from non-existent login id #' . $_SESSION['docman_login_id'] . '. (Login is probably no longer valid.)');
 				return null;
 			}
 		} else {
