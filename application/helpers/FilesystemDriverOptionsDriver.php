@@ -166,17 +166,6 @@ class FilesystemDriverOptionsDriver implements IFilesystemDriver
 	{
 	}
 
-	public function get_display_name($filename)
-	{
-	}
-	public function set_display_name($filename, $display_name)
-	{
-	}
-
-	public function get_access_link($filename)
-	{
-	}
-
 	public function get_owner_id($filename)
 	{
 	}
@@ -188,16 +177,6 @@ class FilesystemDriverOptionsDriver implements IFilesystemDriver
 	{
 	}
 	public function set_permissions($filename, $permissions)
-	{
-	}
-
-	public function get_tags($filename)
-	{
-	}
-	public function add_tag($filename, $tag_id)
-	{
-	}
-	public function remove_tag($filename, $tag_id)
 	{
 	}
 }

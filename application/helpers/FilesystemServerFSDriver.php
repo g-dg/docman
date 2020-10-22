@@ -164,38 +164,10 @@ class FilesystemServerFSDriver implements IFilesystemDriver
 	{
 	}
 
-	public function get_display_name($filename)
-	{
-	}
-	public function set_display_name($filename, $display_name)
-	{
-	}
-
-	public function get_access_link($filename)
-	{
-	}
-
-	public function get_owner_id($filename)
-	{
-	}
-	public function set_owner_id($filename, $owner_id)
-	{
-	}
-
 	public function get_permissions($filename, $group_ids = null)
 	{
 	}
 	public function set_permissions($filename, $permissions)
-	{
-	}
-
-	public function get_tags($filename)
-	{
-	}
-	public function add_tag($filename, $tag_id)
-	{
-	}
-	public function remove_tag($filename, $tag_id)
 	{
 	}
 }
