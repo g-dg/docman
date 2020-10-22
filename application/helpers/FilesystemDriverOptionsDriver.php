@@ -172,11 +172,4 @@ class FilesystemDriverOptionsDriver implements IFilesystemDriver
 	public function set_owner_id($filename, $owner_id)
 	{
 	}
-
-	public function get_permissions($filename, $group_ids = null)
-	{
-	}
-	public function set_permissions($filename, $permissions)
-	{
-	}
 }

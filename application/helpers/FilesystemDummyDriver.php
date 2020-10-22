@@ -197,11 +197,4 @@ class FilesystemDummyDriver implements IFilesystemDriver
 	{
 		return false;
 	}
-
-	public function get_permissions($filename, $group_ids = null)
-	{
-	}
-	public function set_permissions($filename, $permissions)
-	{
-	}
 }

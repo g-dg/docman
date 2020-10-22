@@ -163,11 +163,4 @@ class FilesystemRemoteDriver implements IFilesystemDriver
 	public function move($source, $destination)
 	{
 	}
-
-	public function get_permissions($filename, $group_ids = null)
-	{
-	}
-	public function set_permissions($filename, $permissions)
-	{
-	}
 }
