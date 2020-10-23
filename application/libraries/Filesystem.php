@@ -692,7 +692,7 @@ class Filesystem
 		}
 
 		$entry_id = $this->get_file_db_entry_id($filename, true);
-		$this->CI->db->query('UPDATE "files" SET "display_name" = ? WHERE "id" = ?;', [$display_name, $entry_id])->result_array();
+		$this->CI->db->query('UPDATE "files" SET "display_name" = ? WHERE "id" = ?;', [$display_name, $entry_id]);
 		
 		return true;
 	}
@@ -721,7 +721,7 @@ class Filesystem
 		}
 
 		$entry_id = $this->get_file_db_entry_id($filename, true);
-		$this->CI->db->query('UPDATE "files" SET "owner_user_id" = ? WHERE "id" = ?;', [$owner_id, $entry_id])->result_array();
+		$this->CI->db->query('UPDATE "files" SET "owner_user_id" = ? WHERE "id" = ?;', [$owner_id, $entry_id]);
 		
 		return true;
 	}
@@ -729,7 +729,6 @@ class Filesystem
 
 	/*
 		Permissions are in an array for each group id
-		Group ids that are not listed do not have access
 		Permission arrays contain the keys: 'read', 'write', 'share', 'expires'
 	*/
 	public function get_permissions($filename)
@@ -739,11 +738,63 @@ class Filesystem
 			return false;
 		}
 
-		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($filename));
-		$mountpoint = $mountpoint_info['mountpoint'];
-		$internal_path = $mountpoint_info['internal_path'];
+		$entry_id = $this->get_file_db_entry_id($filename, false);
+		if (is_null($entry_id)) {
+			return [];
+		}
 
-		//TODO
+		$permissions = [];
+		$permissions_res = $this->CI->db->query('SELECT "group_id", "read", "write", "share", "expires" FROM "file_permissions" WHERE "file_id" = ?;', )->result_array();
+		foreach ($permissions_res as $permission) {
+			$permissions[] = [
+				'group_id' => (int)$permission['group_id'],
+				'read' => ((int)$permission['read'] == 1),
+				'write' => ((int)$permission['write'] == 1),
+				'share' => ((int)$permission['share'] == 1),
+				'expires' => (int)$permission['expires']
+			];
+		}
+
+		return $permissions;
+	}
+
+	public function get_effective_permissions($filename)
+	{
+		if (!$this->get_db_permissions($filename)['read']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to get effective permissions of file "' . $filename . '" without read permission.');
+			return false;
+		}
+
+		$file_db_entries = $this->get_parent_file_db_entry_ids($filename);
+
+		$group_statuses = [];
+
+		for ($i = 0; $i < count($file_db_entries); $i++) {
+			$permissions_res = $this->CI->db->query(
+				'SELECT "group_id", "read", "write", "share" FROM "file_permissions" WHERE "file_id" = ? AND ("expires" IS NULL OR "expires" > ?);',
+				[
+					$file_db_entries[$i],
+					time()
+				]
+			)->result_array();
+
+			foreach ($permissions_res as $perm_rec) {
+				$group_id = (int)$perm_rec['group_id'];
+				$read = ($perm_rec['read'] == 1);
+				$write = ($perm_rec['write'] == 1);
+				$share = ($perm_rec['share'] == 1);
+
+				if (isset($group_statuses[$group_id])) {
+					$read = $read && $group_statuses[$group_id]['read'];
+					$write = $write && $group_statuses[$group_id]['write'];
+					$share = $share && $group_statuses[$group_id]['share'];
+				} else {
+					$group_statuses[$group_id] = ['group_id' => $group_id, 'read' => $read, 'write' => $write, 'share' => $share];
+				}
+			}
+		}
+
+		return $group_statuses;
 	}
 
 	public function set_permissions($filename, $permissions)
@@ -753,11 +804,27 @@ class Filesystem
 			return false;
 		}
 
-		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($filename));
-		$mountpoint = $mountpoint_info['mountpoint'];
-		$internal_path = $mountpoint_info['internal_path'];
+		$this->CI->db->trans_start();
 
-		//TODO
+		$entry_id = $this->get_file_db_entry_id($filename, true);
+		if (!is_null($entry_id)) {
+			$this->CI->db->query('DELETE FROM "file_permissions" WHERE "file_id" = ?;', [$entry_id]);
+		}
+
+		foreach ($permissions as $permission) {
+			$this->CI->db->query('INSERT INTO "file_permissions" ("file_id", "group_id", "read", "write", "share", "expires") VALUES (?, ?, ?, ?, ?, ?);', [
+				$entry_id,
+				$permission['group_id'],
+				($permission['read'] ? 1 : 0),
+				($permission['write'] ? 1 : 0),
+				($permission['share'] ? 1 : 0),
+				$permission['exipres']
+			]);
+		}
+
+		$this->CI->db->trans_complete();
+
+		return true;
 	}
 
 
@@ -795,7 +862,7 @@ class Filesystem
 		$tag_exists = (int)($this->CI->db->query('SELECT COUNT() AS "count" FROM "tagged_files" WHERE "file_id" = ? AND "tag_id" = ?;', [$entry_id, $tag_id])->result_array()[0]['count']);
 
 		if ($tag_exists == 0) {
-			$this->CI->db->query('INSERT INTO "tagged_files" ("file_id", "tag_id") VALUES ?, ?;', [$entry_id, $tag_id])->result_array();
+			$this->CI->db->query('INSERT INTO "tagged_files" ("file_id", "tag_id") VALUES ?, ?;', [$entry_id, $tag_id]);
 		}
 
 		return true;
@@ -810,7 +877,7 @@ class Filesystem
 		}
 
 		$entry_id = $this->get_file_db_entry_id($filename, true);
-		$this->CI->db->query('DELETE FROM "tagged_files" WHERE "file_id" = ? AND "tag_id" = ?;', [$entry_id, $tag_id])->result_array();
+		$this->CI->db->query('DELETE FROM "tagged_files" WHERE "file_id" = ? AND "tag_id" = ?;', [$entry_id, $tag_id]);
 
 		return true;
 	}
