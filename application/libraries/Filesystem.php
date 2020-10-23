@@ -1,31 +1,19 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class FilesystemActionNotSupportedException extends Exception
-{
-}
-
 // paths will be sent to the drivers with a leading slash but no trailing slash.
 
 class Filesystem
 {
 	private $CI;
 
-	private $mountpoint_defs = [];
 	private $mountpoints = [];
 
 	public function __construct()
 	{
 		$this->CI = &get_instance();
 
-		// get mountpoint definitions
-		$mountpoint_defs = $this->CI->db->query('SELECT "id", "destination_path" FROM "mountpoint_defs" ORDER BY "id";')->result_array();
-		foreach ($mountpoint_defs as $mountpoint) {
-			$this->mountpoint_defs[(int)$mountpoint['id']] = [
-				'id' => (int)$mountpoint['id'],
-				'destination_path' => $mountpoint['destination_path']
-			];
-		}
+		$this->CI->load->library('authentication');
 	}
 
 	public function __destruct()
@@ -46,7 +34,7 @@ class Filesystem
 		if (!isset($this->mountpoints[(int)$mountpoint_info['id']])) {
 
 			$driver = $mountpoint_info['driver'];
-			$driver_options = json_decode($mountpoint_info[0]['driver_options'], true);
+			$driver_options = json_decode($mountpoint_info['driver_options'], true);
 			if (json_last_error() != JSON_ERROR_NONE) {
 				log_message('error', 'Malformed driver option JSON data for mountpoint id# ' . $mountpoint_info['id'] . '.');
 				return false;
@@ -138,7 +126,17 @@ class Filesystem
 		$closest_match = null;
 		$closest_match_count = 0;
 
-		foreach ($this->mountpoint_defs as $mountpoint) {
+		$mountpoint_defs_res = $this->CI->db->query('SELECT "id", "destination_path" FROM "mountpoint_defs" ORDER BY "id";')->result_array();
+		$mountpoint_defs = [];
+		foreach ($mountpoint_defs_res as $mountpoint_def) {
+			$mountpoint_defs[(int)$mountpoint_def['id']] = [
+				'id' => (int)$mountpoint_def['id'],
+				'destination_path' => $mountpoint_def['destination_path'],
+				'driver_options' => $mountpoint_def['driver_options']
+			];
+		}
+
+		foreach ($mountpoint_defs as $mountpoint) {
 			$mountpoint_dest_parts = explode('/', trim($mountpoint['destination_path'], '/'));
 
 			if (count($mountpoint_dest_parts) <= count($path_parts)) { // mountpoint path must be shorter or equal to the requested path
@@ -199,7 +197,7 @@ class Filesystem
 				$mountpoint_path,
 				$this->get_owner_id($full_path), // get the owner id, shouldn't run recursively since getting the owner id should not create a new file id
 				'{}'
-			]);
+			])->result_array();
 			return (int)$this->CI->db->insert_id();
 		} else if ($get_parent_if_null) {
 			$full_path_parts = explode('/', trim($full_path, '/'));
@@ -270,7 +268,7 @@ class Filesystem
 				$read = ($perm_rec['read'] == 1);
 				$write = ($perm_rec['write'] == 1);
 				$share = ($perm_rec['share'] == 1);
-				
+
 				if (isset($group_statuses[$group_id])) {
 					$read = $read && $group_statuses[$group_id]['read'];
 					$write = $write && $group_statuses[$group_id]['write'];
@@ -292,6 +290,7 @@ class Filesystem
 
 		return ['read' => $read, 'write' => $write, 'share' => $share];
 	}
+
 
 
 	public function opendir($path)
@@ -326,7 +325,9 @@ class Filesystem
 
 	public function fopen($path, $mode)
 	{
-		if (!$this->get_db_permissions($path)['read']) {
+		$perms = $this->get_db_permissions($path);
+
+		if (!$perms['read']) {
 			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to open file "' . $path . '" without read permission.');
 			return false;
 		}
@@ -336,7 +337,7 @@ class Filesystem
 			return false;
 		}
 
-		if (in_array($mode, ['r+', 'w', 'w+', 'a', 'a+']) && !$this->get_db_permissions($path)['write']) {
+		if (in_array($mode, ['r+', 'w', 'w+', 'a', 'a+']) && !$perms['write']) {
 			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to open directory "' . $path . '" without read permission.');
 			return false;
 		}
@@ -386,6 +387,11 @@ class Filesystem
 
 	public function disk_usage($directory) // returns associative array with keys 'free', 'used', 'total'
 	{
+		if (!$this->get_db_permissions($directory)['read']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to check disk usage for directory "' . $directory . '" without read permission.');
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($directory));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -395,6 +401,11 @@ class Filesystem
 
 	public function file_exists($filename)
 	{
+		if (!$this->get_db_permissions($filename)['read']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to check if file "' . $filename . '" exists without read permission.');
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($filename));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -404,6 +415,11 @@ class Filesystem
 
 	public function filemtime($filename)
 	{
+		if (!$this->get_db_permissions($filename)['read']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to get modified time of file "' . $filename . '" without read permission.');
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($filename));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -413,6 +429,11 @@ class Filesystem
 
 	public function filesize($filename)
 	{
+		if (!$this->get_db_permissions($filename)['read']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to get filesize of "' . $filename . '" without read permission.');
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($filename));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -422,6 +443,11 @@ class Filesystem
 
 	public function filetype($filename) // returns either 'file', 'dir', or 'unknown'
 	{
+		if (!$this->get_db_permissions($filename)['read']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to get filetype of "' . $filename . '" without read permission.');
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($filename));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -431,6 +457,11 @@ class Filesystem
 
 	public function filecount($directory)
 	{
+		if (!$this->get_db_permissions($directory)['read']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to get filecount of "' . $directory . '" without read permission.');
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($directory));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -440,6 +471,10 @@ class Filesystem
 
 	public function is_readable($filename)
 	{
+		if (!$this->get_db_permissions($filename)['read']) {
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($filename));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -449,6 +484,11 @@ class Filesystem
 
 	public function is_writable($filename)
 	{
+		$perms = $this->get_db_permissions($filename);
+		if (!$perms['read'] || !$perms['write']) {
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($filename));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -458,6 +498,12 @@ class Filesystem
 
 	public function touch($filename)
 	{
+		$perms = $this->get_db_permissions($filename);
+		if (!$perms['read'] || !$perms['write']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to create file "' . $filename . '" without write permission.');
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($filename));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -467,6 +513,12 @@ class Filesystem
 
 	public function mkdir($pathname)
 	{
+		$perms = $this->get_db_permissions($pathname);
+		if (!$perms['read'] || !$perms['write']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to create folder "' . $pathname . '" without write permission.');
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($pathname));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -476,6 +528,12 @@ class Filesystem
 
 	public function rmdir($pathname)
 	{
+		$perms = $this->get_db_permissions($pathname);
+		if (!$perms['read'] || !$perms['write']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to delete folder "' . $pathname . '" without write permission.');
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($pathname));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -485,6 +543,12 @@ class Filesystem
 
 	public function unlink($filename)
 	{
+		$perms = $this->get_db_permissions($filename);
+		if (!$perms['read'] || !$perms['write']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to delete file "' . $filename . '" without write permission.');
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($filename));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -494,6 +558,18 @@ class Filesystem
 
 	public function copy($source, $destination)
 	{
+		$src_perms = $this->get_db_permissions($source);
+		if (!$src_perms['read']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to copy from file "' . $source . '" to "' . $destination . '" without read permission on source.');
+			return false;
+		}
+
+		$dest_perms = $this->get_db_permissions($destination);
+		if (!$dest_perms['read'] || !$dest_perms['write']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to copy from file "' . $source . '" to "' . $destination . '" without write permission on destination.');
+			return false;
+		}
+
 		$src_mountpoint_info = $this->get_mountpoint_info($this->sanitize_path($source));
 		$dst_mountpoint_info = $this->get_mountpoint_info($this->sanitize_path($destination));
 		if (is_null($src_mountpoint_info) || is_null($dst_mountpoint_info))
@@ -516,7 +592,7 @@ class Filesystem
 				return false;
 
 			while (!$this->feof($src_fh)) {
-				$buf = $this->fread($src_fh, 1048576);
+				$buf = $this->fread($src_fh, 32768);
 				if ($buf === false)
 					return false;
 
@@ -536,6 +612,18 @@ class Filesystem
 
 	public function move($source, $destination)
 	{
+		$src_perms = $this->get_db_permissions($source);
+		if (!$src_perms['read'] || !$src_perms['write']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to move file "' . $source . '" to "' . $destination . '" without write permission on source.');
+			return false;
+		}
+
+		$dest_perms = $this->get_db_permissions($destination);
+		if (!$dest_perms['read'] || !$dest_perms['write']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to move file "' . $source . '" to "' . $destination . '" without write permission on destination.');
+			return false;
+		}
+
 		$src_mountpoint_info = $this->get_mountpoint_info($this->sanitize_path($source));
 		$dst_mountpoint_info = $this->get_mountpoint_info($this->sanitize_path($destination));
 		if (is_null($src_mountpoint_info) || is_null($dst_mountpoint_info))
@@ -558,7 +646,7 @@ class Filesystem
 				return false;
 
 			while (!$this->feof($src_fh)) {
-				$buf = $this->fread($src_fh, 1048576);
+				$buf = $this->fread($src_fh, 32768);
 				if ($buf === false)
 					return false;
 
@@ -581,18 +669,61 @@ class Filesystem
 
 	public function get_display_name($filename)
 	{
+		if (!$this->get_db_permissions($filename)['read']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to get display name of file "' . $filename . '" without read permission.');
+			return false;
+		}
+
+		$entry_id = $this->get_file_db_entry_id($filename, true);
+		$name = $this->CI->db->query('SELECT "display_name" FROM "files" WHERE "id" = ?;', [$entry_id])->result_array();
+		if (isset($name[0])) {
+			return $name['display_name'];
+		} else {
+			return basename($filename);
+		}
 	}
 
 	public function set_display_name($filename, $display_name)
 	{
+		$perms = $this->get_db_permissions($filename);
+		if (!$perms['read'] || !$perms['write']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to set display name of file "' . $filename . '" without write permission.');
+			return false;
+		}
+
+		$entry_id = $this->get_file_db_entry_id($filename, true);
+		$this->CI->db->query('UPDATE "files" SET "display_name" = ? WHERE "id" = ?;', [$display_name, $entry_id])->result_array();
+		
+		return true;
 	}
 
 	public function get_owner_id($filename)
 	{
+		if (!$this->get_db_permissions($filename)['read']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to get owner of file "' . $filename . '" without read permission.');
+			return false;
+		}
+
+		$entry_id = $this->get_file_db_entry_id($filename, true);
+		$owner = $this->CI->db->query('SELECT "owner_user_id" FROM "files" WHERE "id" = ?;', [$entry_id])->result_array();
+		if (isset($owner[0])) {
+			return (int)$owner['owner_user_id'];
+		} else {
+			return null;
+		}
 	}
 
 	public function set_owner_id($filename, $owner_id)
 	{
+		if ($this->CI->authentication->get_current_user_type() !== 'admin' && $this->get_owner_id($filename) !== $this->CI->authentication->get_current_user_id()) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to set owner of file "' . $filename . '" without being owner or admin.');
+			return false;
+		}
+
+		$entry_id = $this->get_file_db_entry_id($filename, true);
+		$this->CI->db->query('UPDATE "files" SET "owner_user_id" = ? WHERE "id" = ?;', [$owner_id, $entry_id])->result_array();
+		
+		return true;
 	}
 
 
@@ -601,37 +732,91 @@ class Filesystem
 		Group ids that are not listed do not have access
 		Permission arrays contain the keys: 'read', 'write', 'share', 'expires'
 	*/
-	public function get_permissions($filename, $group_ids = null)
+	public function get_permissions($filename)
 	{
+		if (!$this->get_db_permissions($filename)['read']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to get permissions of file "' . $filename . '" without read permission.');
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($filename));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
 
-		return $mountpoint->get_permissions($internal_path, $group_ids);
+		//TODO
 	}
 
 	public function set_permissions($filename, $permissions)
 	{
+		if ($this->CI->authentication->get_current_user_type() !== 'admin' && $this->get_owner_id($filename) !== $this->CI->authentication->get_current_user_id()) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to set permissions of file "' . $filename . '" without being owner or admin.');
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($filename));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
 
-		return $mountpoint->set_permissions($internal_path, $permissions);
+		//TODO
 	}
 
 
 	public function get_tags($filename)
 	{
+		if (!$this->get_db_permissions($filename)['read']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to get tags of file "' . $filename . '" without read permission.');
+			return false;
+		}
+
+		$entry_id = $this->get_file_db_entry_id($filename, true);
+		$tags_res = $this->CI->db->query('SELECT "tags"."id" AS "tag_id", "tags"."name" AS "tag_name", "tags"."description" AS "tag_description" FROM "tags" INNER JOIN "tagged_files" ON "tagged_files"."tag_id" = "tags"."id" WHERE "tagged_files"."file_id" = ?;', [$entry_id])->result_array();
+
+		$tags = [];
+		foreach ($tags_res as $tag) {
+			$tags[] = [
+				'id' => (int)$tag['tag_id'],
+				'name' => $tag['tag_name'],
+				'description' => $tag['tag_description'],
+			];
+		}
+
+		return $tags;
 	}
 
 	public function add_tag($filename, $tag_id)
 	{
+		$perms = $this->get_db_permissions($filename);
+		if (!$perms['read'] || !$perms['write']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to add tag to file "' . $filename . '" without write permission.');
+			return false;
+		}
+
+		$entry_id = $this->get_file_db_entry_id($filename, true);
+		$tag_exists = (int)($this->CI->db->query('SELECT COUNT() AS "count" FROM "tagged_files" WHERE "file_id" = ? AND "tag_id" = ?;', [$entry_id, $tag_id])->result_array()[0]['count']);
+
+		if ($tag_exists == 0) {
+			$this->CI->db->query('INSERT INTO "tagged_files" ("file_id", "tag_id") VALUES ?, ?;', [$entry_id, $tag_id])->result_array();
+		}
+
+		return true;
 	}
 
 	public function remove_tag($filename, $tag_id)
 	{
+		$perms = $this->get_db_permissions($filename);
+		if (!$perms['read'] || !$perms['write']) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to remove tag from file "' . $filename . '" without write permission.');
+			return false;
+		}
+
+		$entry_id = $this->get_file_db_entry_id($filename, true);
+		$this->CI->db->query('DELETE FROM "tagged_files" WHERE "file_id" = ? AND "tag_id" = ?;', [$entry_id, $tag_id])->result_array();
+
+		return true;
 	}
 }
+
+
 
 /**
  * Defines the directory handle interface
@@ -721,12 +906,4 @@ interface IFilesystemDriver
 	public function unlink($filename);
 	public function copy($source, $destination); // only called for the same filesystem
 	public function move($source, $destination); // only called for same filesystem, also rename
-
-	/*
-		Permissions are in an array for each group id
-		Group ids that are not listed do not have access
-		Permission arrays contain the keys: 'read', 'write', 'share', 'expires'
-	*/
-	public function get_permissions($filename, $group_ids = null);
-	public function set_permissions($filename, $permissions);
 }
