@@ -300,6 +300,11 @@ class Filesystem
 			return false;
 		}
 
+		if (!$this->is_readable($path)) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to open directory "' . $path . '" which is not readable.');
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($path));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -338,9 +343,11 @@ class Filesystem
 		}
 
 		if (in_array($mode, ['r+', 'w', 'w+', 'a', 'a+']) && !$perms['write']) {
-			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to open directory "' . $path . '" without read permission.');
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to open file "' . $path . '" for writing without write permission.');
 			return false;
 		}
+
+		// Note: there is no readability/writability checking here since this can be used to create a file that would seem to be not readable/writable
 
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($path));
 		$mountpoint = $mountpoint_info['mountpoint'];
@@ -392,6 +399,11 @@ class Filesystem
 			return false;
 		}
 
+		if (!$this->is_readable($directory)) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to check disk usage for directory "' . $directory . '" which is not readable.');
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($directory));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -420,6 +432,11 @@ class Filesystem
 			return false;
 		}
 
+		if (!$this->is_readable($filename)) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to get modified time of file "' . $filename . '" which is not readable.');
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($filename));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -434,6 +451,11 @@ class Filesystem
 			return false;
 		}
 
+		if (!$this->is_readable($filename)) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to get filesize of "' . $filename . '" which is not readable.');
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($filename));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -441,10 +463,15 @@ class Filesystem
 		return $mountpoint->filesize($internal_path);
 	}
 
-	public function filetype($filename) // returns either 'file', 'dir', or 'unknown'
+	public function filetype($filename) // returns either 'file', 'dir', or 'unknown', or false on failure
 	{
 		if (!$this->get_db_permissions($filename)['read']) {
 			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to get filetype of "' . $filename . '" without read permission.');
+			return false;
+		}
+
+		if (!$this->is_readable($filename)) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to get filetype of "' . $filename . '" which is not readable.');
 			return false;
 		}
 
@@ -462,6 +489,11 @@ class Filesystem
 			return false;
 		}
 
+		if (!$this->is_readable($directory)) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to get filecount of "' . $directory . '" which is not readable.');
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($directory));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -472,6 +504,10 @@ class Filesystem
 	public function is_readable($filename)
 	{
 		if (!$this->get_db_permissions($filename)['read']) {
+			return false;
+		}
+
+		if (!$this->file_exists($filename)) {
 			return false;
 		}
 
@@ -486,6 +522,10 @@ class Filesystem
 	{
 		$perms = $this->get_db_permissions($filename);
 		if (!$perms['read'] || !$perms['write']) {
+			return false;
+		}
+
+		if (!$this->is_readable($filename)) {
 			return false;
 		}
 
@@ -504,6 +544,8 @@ class Filesystem
 			return false;
 		}
 
+		//Note: no readability/writability checking since this can create the file
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($filename));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -519,6 +561,8 @@ class Filesystem
 			return false;
 		}
 
+		//Note: no readability/writability checking since this can create the directory
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($pathname));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -531,6 +575,11 @@ class Filesystem
 		$perms = $this->get_db_permissions($pathname);
 		if (!$perms['read'] || !$perms['write']) {
 			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to delete folder "' . $pathname . '" without write permission.');
+			return false;
+		}
+
+		if (!$this->is_writable($pathname)) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to delete folder "' . $pathname . '" which is not writable.');
 			return false;
 		}
 
@@ -549,6 +598,11 @@ class Filesystem
 			return false;
 		}
 
+		if (!$this->is_writable($filename)) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to delete file "' . $filename . '" which is not writable.');
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($filename));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -561,6 +615,11 @@ class Filesystem
 		$src_perms = $this->get_db_permissions($source);
 		if (!$src_perms['read']) {
 			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to copy from file "' . $source . '" to "' . $destination . '" without read permission on source.');
+			return false;
+		}
+
+		if (!$this->is_readable($source)) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to copy from file "' . $source . '" to "' . $destination . '" without source being readable.');
 			return false;
 		}
 
@@ -615,6 +674,11 @@ class Filesystem
 		$src_perms = $this->get_db_permissions($source);
 		if (!$src_perms['read'] || !$src_perms['write']) {
 			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to move file "' . $source . '" to "' . $destination . '" without write permission on source.');
+			return false;
+		}
+
+		if (!$this->is_writable($source)) {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to move file "' . $source . '" to "' . $destination . '" without source being writable.');
 			return false;
 		}
 
