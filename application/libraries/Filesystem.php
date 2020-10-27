@@ -958,7 +958,6 @@ interface IFilesystemDirectoryHandle
 
 	/**
 	 * Opens a directory for reading with readdir
-	 * Must also be the constructor
 	 * @return IDirectoryHandle
 	 */
 	public function opendir($path);
@@ -983,8 +982,7 @@ interface IFilesystemFileHandle
 
 	/**
 	 * Opens a file for reading and writing with fread() and fwrite() and seeking with fseek() and rewind()
-	 * Must also be the constructor
-	 * Mode may only be 'r' or 'w'
+	 * Mode may only be 'r', 'w', 'r+', 'w+', 'a', 'a+'
 	 * @return IDirectory
 	 */
 	public function fopen($path, $mode);
