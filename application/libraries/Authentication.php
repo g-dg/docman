@@ -135,7 +135,7 @@ class Authentication
 		setup_session();
 
 		if (isset($_SESSION['docman_login_id'])) {
-			$logins = $this->CI->db->query('SELECT "users"."id" AS "user_id", "users"."username" AS "username" FROM "users" INNER JOIN "logins" ON "logins"."user_id" = "users"."id" WHERE "logins".id" = ?;', [$_SESSION['docman_login_id']])->result_array();
+			$logins = $this->CI->db->query('SELECT "users"."id" AS "user_id", "users"."username" AS "username" FROM "users" INNER JOIN "logins" ON "logins"."user_id" = "users"."id" WHERE "logins"."id" = ?;', [$_SESSION['docman_login_id']])->result_array();
 			if (isset($logins[0])) {
 				return $logins[0]['username'];
 			} else {
@@ -152,7 +152,7 @@ class Authentication
 		setup_session();
 
 		if (isset($_SESSION['docman_login_id'])) {
-			$logins = $this->CI->db->query('SELECT "users"."id" AS "user_id", "users"."type" AS "user_type" FROM "users" INNER JOIN "logins" ON "logins"."user_id" = "users"."id" WHERE "logins".id" = ?;', [$_SESSION['docman_login_id']])->result_array();
+			$logins = $this->CI->db->query('SELECT "users"."id" AS "user_id", "users"."type" AS "user_type" FROM "users" INNER JOIN "logins" ON "logins"."user_id" = "users"."id" WHERE "logins"."id" = ?;', [$_SESSION['docman_login_id']])->result_array();
 			if (isset($logins[0])) {
 				switch ((int)$logins[0]['user_type']) {
 					case 0:
@@ -185,7 +185,7 @@ class Authentication
 			return null;
 		}
 
-		$groups_res = $this->CI->db->query('SELECT "group_id" FROM "users_in_groups" WHERE "user_id" = ?;', [$user_id]);
+		$groups_res = $this->CI->db->query('SELECT "group_id" FROM "users_in_groups" WHERE "user_id" = ?;', [$user_id])->result_array();
 
 		$groups = [];
 
