@@ -18,8 +18,8 @@ class Filesystem
 
 	public function __destruct()
 	{
-		foreach ($this->mounts as $mount) {
-			$mount->unmount();
+		foreach ($this->mountpoints as $mountpoint) {
+			$mountpoint->unmount();
 		}
 	}
 
