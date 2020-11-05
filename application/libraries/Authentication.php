@@ -66,6 +66,15 @@ class Authentication
 	}
 
 	/**
+	 * Logs the current user out
+	 */
+	public function logout()
+	{
+		setup_session();
+		unset($_SESSION['docman_login_id']);
+	}
+
+	/**
 	 * Ensures a user's credentials are valid
 	 * @param username The username to check
 	 * @param password The password to check
