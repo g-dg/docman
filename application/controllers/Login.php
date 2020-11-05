@@ -38,4 +38,14 @@ class Login extends CI_Controller
 			echo 'There was an error with your request. Please go back and try again.';
 		}
 	}
+
+	/**
+	 * Logs the user out
+	 */
+	public function logout()
+	{
+		setup_session();
+
+		$this->authentication->logout();
+	}
 }
