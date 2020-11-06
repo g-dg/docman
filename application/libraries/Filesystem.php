@@ -194,7 +194,7 @@ class Filesystem
 		} else if ($create) {
 			$this->CI->db->query('INSERT INTO "files" ("mountpoint_id", "path_in_mountpoint", "owner_user_id", "mountpoint_driver_info") VALUES (?, ?, ?, ?);', [
 				$mountpoint_id,
-				$mountpoint_path,
+				'/' . trim($mountpoint_path, '/'),
 				$this->get_owner_id($full_path), // get the owner id, shouldn't run recursively since getting the owner id should not create a new file id
 				'{}'
 			])->result_array();
