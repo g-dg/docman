@@ -23,6 +23,20 @@ class Filesystem
 		}
 	}
 
+	public function path_to_path_array($path_string)
+	{
+		$array = explode('/', trim($path_string, '/'));
+		if ($array[0] === '') {
+			$array = [];
+		}
+		return $array;
+	}
+
+	public function path_array_to_path($path_array)
+	{
+		return '/' . implode('/', $path_array);
+	}
+
 	/**
 	 * Sets up and returns required mountpoint
 	 * @return array ['mount' => <mounted and set up mountpoint>, 'internal_path' => <path inside mountpoint>]
@@ -122,7 +136,7 @@ class Filesystem
 	 */
 	protected function get_mountpoint_info($path)
 	{
-		$path_parts = explode('/', trim($path, '/'));
+		$path_parts = $this->path_to_path_array($path);
 		$closest_match = null;
 		$closest_match_count = 0;
 
@@ -138,7 +152,7 @@ class Filesystem
 		}
 
 		foreach ($mountpoint_defs as $mountpoint) {
-			$mountpoint_dest_parts = explode('/', trim($mountpoint['destination_path'], '/'));
+			$mountpoint_dest_parts = $this->path_to_path_array($mountpoint['destination_path']);
 
 			if (count($mountpoint_dest_parts) <= count($path_parts)) { // mountpoint path must be shorter or equal to the requested path
 				$is_match = true;
@@ -170,12 +184,12 @@ class Filesystem
 	{
 		$mountpoint_dest = $this->get_mountpoint_info($full_path)['destination_path'];
 
-		$full_path_parts = explode('/', trim($full_path, '/'));
-		$mountpoint_dest_parts = explode('/', trim($mountpoint_dest, '/'));
+		$full_path_parts = $this->path_to_path_array($full_path);
+		$mountpoint_dest_parts = $this->path_to_path_array($mountpoint_dest);
 
 		$path_parts = array_slice($full_path_parts, count($mountpoint_dest_parts));
 
-		return '/' . implode('/', $path_parts);
+		return $this->path_array_to_path($path_parts);
 	}
 
 	/**
@@ -202,11 +216,12 @@ class Filesystem
 			return (int)$this->CI->db->insert_id();
 		} else if ($get_parent_if_null) {
 			$full_path_parts = explode('/', trim($full_path, '/'));
+			$full_path_parts = $this->path_to_path_array($full_path);
 			if (count($full_path_parts) > 1) {
 				array_pop($full_path_parts);
-				return $this->get_file_db_entry_id(('/' . implode('/', $full_path_parts)), false, true);
+				return $this->get_file_db_entry_id($this->path_array_to_path($full_path_parts), false, true);
 			} else {
-				return null;
+				return null; //TODO: return root file
 			}
 		} else {
 			return null;
@@ -218,24 +233,32 @@ class Filesystem
 	 */
 	public function get_parent_file_db_entry_ids($full_path)
 	{
-		$full_path_parts = explode('/', trim($full_path, '/'));
-		$full_path_part_count = count($full_path_parts);
+		$full_path_parts = $this->path_to_path_array($full_path);
+		$processing_path_length = count($full_path_parts);
 
 		$file_db_entry_ids = [];
 
-		while (count($full_path_parts) > 0) {
-			$path = '/' . implode('/', $full_path_parts);
+		// var_dump($full_path);
+
+		for ($processing_path_length = count($full_path_parts); $processing_path_length > -1; $processing_path_length--) {
+			$processing_path_parts = array_slice($full_path_parts, 0, $processing_path_length);
+			// var_dump($processing_path_parts);
+
+			$path = $this->path_array_to_path($processing_path_parts);
 			$mountpoint_id = $this->get_mountpoint_info($path)['id'];
-			$mountpoint_path = $this->get_path_in_mountpoint($path);
+			$mountpoint_path = '/' . trim($this->get_path_in_mountpoint($path), '/');
+
+			// var_dump($processing_path_length);
+			// var_dump($mountpoint_path);
 
 			$result = $this->CI->db->query('SELECT "id" FROM "files" WHERE "mountpoint_id" = ? AND "path_in_mountpoint" = ?;', [$mountpoint_id, $mountpoint_path])->result_array();
 			if (isset($result[0])) {
 				$file_db_entry_ids[] = (int)$result[0]['id'];
 			}
-
-			array_pop($full_path_parts);
 		}
 
+		// var_dump(['path' => $full_path, 'entry_ids' => $file_db_entry_ids]);
+		// echo '<br/><br/>';
 		return $file_db_entry_ids;
 	}
 
@@ -306,6 +329,11 @@ class Filesystem
 			return false;
 		}
 
+		if ($this->filetype($path) != 'dir') {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to open "' . $path . '" as a directory while it is not a directory.');
+			return false;
+		}
+
 		$mountpoint_info = $this->get_mountpoint($this->sanitize_path($path));
 		$mountpoint = $mountpoint_info['mountpoint'];
 		$internal_path = $mountpoint_info['internal_path'];
@@ -345,6 +373,11 @@ class Filesystem
 
 		if (in_array($mode, ['r+', 'w', 'w+', 'a', 'a+']) && !$perms['write']) {
 			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to open file "' . $path . '" for writing without write permission.');
+			return false;
+		}
+
+		if ($this->filetype($path) != 'file') {
+			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to open "' . $path . '" as a file while it is not a file.');
 			return false;
 		}
 
