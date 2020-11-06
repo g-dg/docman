@@ -208,7 +208,7 @@ class FilesystemServerFSDriver implements IFilesystemDriver
 	}
 	public function filetype($filename)
 	{
-		switch ($this->get_fs_path($filename)) {
+		switch (filetype($this->get_fs_path($filename))) {
 			case 'file':
 				return 'file';
 			case 'dir':
