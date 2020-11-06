@@ -1,6 +1,17 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
+/*
+Driver technical name: "server_fs"
+
+Driver settings:
+{
+	"server_fs": {
+		"path": "<path to folder on root fs>"
+	}
+}
+*/
+
 class FilesystemServerFSDirectoryHandle implements IFilesystemDirectoryHandle
 {
 	private $driver;
@@ -103,14 +114,14 @@ class FilesystemServerFSDriver implements IFilesystemDriver
 		$this->CI = &get_instance();
 		$this->mountpoint_id = $mountpoint_id;
 		if (isset($driver_options['server_fs'], $driver_options['server_fs']['path'])) {
-			$this->fs_path = rtrim($driver_options['server_fs']['path'], '/') . '/';
+			$this->fs_path = rtrim($driver_options['server_fs']['path'], '/');
 		} else {
-			$this->fs_path = './';
+			$this->fs_path = '.';
 		}
 	}
 
 	public function get_fs_path($path) {
-		return rtrim($this->fs_path, '/') . '/' . ltrim($this->CI->filesystem->sanitize_path($path));
+		return '/' . trim(rtrim($this->fs_path, '/') . '/' . ltrim($this->CI->filesystem->sanitize_path($path)), '/');
 	}
 
 	public function mount()
