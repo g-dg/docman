@@ -791,7 +791,7 @@ class Filesystem
 
 		$entry_id = $this->get_file_db_entry_id($filename, true);
 		$this->CI->db->query('UPDATE "files" SET "display_name" = ? WHERE "id" = ?;', [$display_name, $entry_id]);
-		
+
 		return true;
 	}
 
@@ -820,7 +820,7 @@ class Filesystem
 
 		$entry_id = $this->get_file_db_entry_id($filename, true);
 		$this->CI->db->query('UPDATE "files" SET "owner_user_id" = ? WHERE "id" = ?;', [$owner_id, $entry_id]);
-		
+
 		return true;
 	}
 
@@ -842,7 +842,7 @@ class Filesystem
 		}
 
 		$permissions = [];
-		$permissions_res = $this->CI->db->query('SELECT "group_id", "read", "write", "share", "expires" FROM "file_permissions" WHERE "file_id" = ?;', )->result_array();
+		$permissions_res = $this->CI->db->query('SELECT "group_id", "read", "write", "share", "expires" FROM "file_permissions" WHERE "file_id" = ?;', [$entry_id])->result_array();
 		foreach ($permissions_res as $permission) {
 			$permissions[] = [
 				'group_id' => (int)$permission['group_id'],
