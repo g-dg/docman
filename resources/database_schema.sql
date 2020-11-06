@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS "mountpoints" (
 CREATE TABLE IF NOT EXISTS "files" (
 	"id" INTEGER PRIMARY KEY NOT NULL,
 	"mountpoint_id" INTEGER NOT NULL REFERENCES "mountpoints", -- which mountpoint this file is part of
-	"path_in_mountpoint" TEXT NOT NULL, -- path inside of the mountpoint
+	"path_in_mountpoint" TEXT NOT NULL, -- path inside of the mountpoint (leading slash and no trailing slash)
 	"display_name" TEXT -- human-friendly display name
 	"type" INTEGER, -- type of file; 0: file, 1: directory
 	"owner_user_id" INTEGER REFERENCES "users", -- the user that can change owner or permissions, null means that nobody owns it so only administrators can modify it.
