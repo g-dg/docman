@@ -121,7 +121,7 @@ class FilesystemServerFSDriver implements IFilesystemDriver
 	}
 
 	public function get_fs_path($path) {
-		return '/' . trim(rtrim($this->fs_path, '/') . '/' . ltrim($this->CI->filesystem->sanitize_path($path)), '/');
+		return rtrim($this->fs_path, '/') . '/' . ltrim($this->CI->filesystem->sanitize_path($path), '/');
 	}
 
 	public function mount()

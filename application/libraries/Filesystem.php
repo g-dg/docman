@@ -43,32 +43,32 @@ class Filesystem
 			$new_mountpoint = null;
 			switch ($driver) {
 				case 'server_fs':
-					$this->CI->load->helper('FilesystemServerFSDriver');
+					$this->CI->load->helper('Filesystem_ServerFS_Driver');
 					$new_mountpoint = new FilesystemServerFSDriver($driver, $driver_options, (int)$mountpoint_info['id']);
 					break;
 
 				case 'database':
-					$this->CI->load->helper('FilesystemDatabaseDriver');
+					$this->CI->load->helper('Filesystem_Database_Driver');
 					$new_mountpoint = new FilesystemDatabaseDriver($driver, $driver_options, (int)$mountpoint_info['id']);
 					break;
 
 					/*case 'remote':
-					$this->CI->load->helper('FilesystemRemoteDriver');
+					$this->CI->load->helper('Filesystem_Remote_Driver');
 					$new_mountpoint = new FilesystemRemoteDriver($driver, $driver_options, (int)$mountpoint_info['id']);
 					break;*/
 
 				case 'driver_options':
-					$this->CI->load->helper('FilesystemDriverOptionsDriver');
+					$this->CI->load->helper('Filesystem_DriverOptions_Driver');
 					$new_mountpoint = new FilesystemDriverOptionsDriver($driver, $driver_options, (int)$mountpoint_info['id']);
 					break;
 
 				case 'driver_options_writable':
-					$this->CI->load->helper('FilesystemDriverOptionsDriver');
+					$this->CI->load->helper('Filesystem_DriverOptions_Driver');
 					$new_mountpoint = new FilesystemDriverOptionsDriver($driver, $driver_options, (int)$mountpoint_info['id']);
 					break;
 
 				case 'dummy':
-					$this->CI->load->helper('FilesystemDummyDriver');
+					$this->CI->load->helper('Filesystem_Dummy_Driver');
 					$new_mountpoint = new FilesystemDummyDriver($driver, $driver_options, (int)$mountpoint_info['id']);
 					break;
 
@@ -78,7 +78,7 @@ class Filesystem
 			}
 
 			if (is_null($new_mountpoint)) {
-				$this->CI->load->helper('FilesystemDummyDriver');
+				$this->CI->load->helper('Filesystem_Dummy_Driver');
 				$new_mountpoint = new FilesystemDummyDriver('dummy', $driver_options, (int)$mountpoint_info['id']);
 			}
 
