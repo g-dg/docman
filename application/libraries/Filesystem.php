@@ -126,7 +126,7 @@ class Filesystem
 		$closest_match = null;
 		$closest_match_count = 0;
 
-		$mountpoint_defs_res = $this->CI->db->query('SELECT "id", "destination_path" FROM "mountpoints" ORDER BY "id";')->result_array();
+		$mountpoint_defs_res = $this->CI->db->query('SELECT "id", "destination_path", "driver_options" FROM "mountpoints" ORDER BY "id";')->result_array();
 		$mountpoint_defs = [];
 		foreach ($mountpoint_defs_res as $mountpoint_def) {
 			$mountpoint_defs[(int)$mountpoint_def['id']] = [
