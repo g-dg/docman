@@ -24,14 +24,13 @@ class Login extends CI_Controller
 		setup_session();
 
 		if (isset($_POST['_csrf_token'], $_POST['username'], $_POST['password']) && check_csrf_token($_POST['_csrf_token'])) {
-			$this->load->helper('url');
 			if ($this->authentication->login($_POST['username'], $_POST['password'])) {
 				session_write_close();
-				redirect($this->config->site_url(), 'location', 303);
+				redirect(site_url(), 'location', 303);
 			} else {
 				$_SESSION['docman_login_result'] = 'Incorrect username or password.';
 				session_write_close();
-				redirect(rtrim($this->config->site_url(), '/') . '/login', 'location', 303);
+				redirect(site_url('/login'), 'location', 303);
 			}
 		} else {
 			set_status_header(400);
@@ -49,6 +48,6 @@ class Login extends CI_Controller
 		$this->authentication->logout();
 
 		$this->load->helper('url');
-		redirect(rtrim($this->config->site_url(), '/') . '/login', 'location', 303);
+		redirect(site_url('/login'), 'location', 303);
 	}
 }
