@@ -212,7 +212,7 @@ class Filesystem
 				'/' . trim($mountpoint_path, '/'),
 				$this->get_owner_id($full_path), // get the owner id, shouldn't run recursively since getting the owner id should not create a new file id
 				'{}'
-			])->result_array();
+			]);
 			return (int)$this->CI->db->insert_id();
 		} else if ($get_parent_if_null) {
 			$full_path_parts = explode('/', trim($full_path, '/'));
@@ -774,8 +774,8 @@ class Filesystem
 
 		$entry_id = $this->get_file_db_entry_id($filename, true);
 		$name = $this->CI->db->query('SELECT "display_name" FROM "files" WHERE "id" = ?;', [$entry_id])->result_array();
-		if (isset($name[0])) {
-			return $name['display_name'];
+		if (isset($name[0]) && !is_null($name[0]['display_name'])) {
+			return $name[0]['display_name'];
 		} else {
 			return basename($filename);
 		}
@@ -802,7 +802,11 @@ class Filesystem
 			return false;
 		}
 
-		$entry_id = $this->get_file_db_entry_id($filename, true);
+		$entry_id = $this->get_file_db_entry_id($filename, false, true);
+		if (is_null($entry_id)) {
+			return null;
+		}
+
 		$owner = $this->CI->db->query('SELECT "owner_user_id" FROM "files" WHERE "id" = ?;', [$entry_id])->result_array();
 		if (isset($owner[0])) {
 			return (int)$owner['owner_user_id'];
