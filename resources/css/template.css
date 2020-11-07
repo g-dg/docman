@@ -1,0 +1,31 @@
+body {
+	margin: 0;
+	font-family: sans-serif;
+}
+
+header {
+	margin-bottom: 16px;
+	padding: 0;
+	border-bottom: #ccc 1px solid;
+	text-align: right;
+}
+header > ul {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+header > ul > li {
+	margin: 0;
+	padding: 8px;
+	display: inline-block;
+}
+
+footer {
+	margin-top: 16px;
+	padding: 8px;
+	border-top: #ccc 1px solid;
+	text-align: right;
+	font-size: 80%;
+	color: #333;
+	font-style: italic;
+}
