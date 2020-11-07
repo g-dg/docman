@@ -1,5 +1,6 @@
 <?php
-define("DOCMAN_VERSION", "0.1.0-dev");
+define('DOCMAN_VERSION', '0.1.0-dev');
+define('DOCMAN_COPYRIGHT', 'Copyright © 2020 Garnet DeGelder');
 
 /**
  * CodeIgniter
