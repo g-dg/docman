@@ -808,8 +808,8 @@ class Filesystem
 		}
 
 		$owner = $this->CI->db->query('SELECT "owner_user_id" FROM "files" WHERE "id" = ?;', [$entry_id])->result_array();
-		if (isset($owner[0])) {
-			return (int)$owner['owner_user_id'];
+		if (isset($owner[0]) && !is_null($owner[0]['owner_user_id'])) {
+			return (int)$owner[0]['owner_user_id'];
 		} else {
 			return null;
 		}
