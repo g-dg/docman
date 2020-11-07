@@ -100,7 +100,7 @@ class Settings
 	{
 		$this->load();
 
-		return $this->settings[$key];
+		return isset($this->settings[$key]);
 	}
 
 	public function unset($key)
