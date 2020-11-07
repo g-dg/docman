@@ -89,7 +89,7 @@ $autoload['drivers'] = array();
 |
 |	$autoload['helper'] = array('url', 'file');
 */
-$autoload['helper'] = array('db_connect', 'session');
+$autoload['helper'] = array('db_connect', 'session', 'url');
 
 /*
 | -------------------------------------------------------------------
