@@ -66,7 +66,7 @@ class FilesystemServerFSFileHandle implements IFilesystemFileHandle
 	public function fopen($path, $mode)
 	{
 		$this->fh = fopen($this->driver->get_fs_path($path), $mode);
-		if ($this->dh !== false) {
+		if ($this->fh !== false) {
 			return $this;
 		} else {
 			return false;
