@@ -6,8 +6,8 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Log In - Garnet DeGelder's DocMan <?= DOCMAN_VERSION ?></title>
-	<link rel="stylesheet" src="<?= html_escape($this->config->base_url('/resources/css/main.css')) ?>" />
-	<link rel="stylesheet" src="<?= html_escape($this->config->base_url('/resources/css/login.css')) ?>" />
+	<link rel="stylesheet" href="<?= html_escape($this->config->base_url('/resources/css/main.css')) ?>" />
+	<link rel="stylesheet" href="<?= html_escape($this->config->base_url('/resources/css/login.css')) ?>" />
 </head>
 
 <body>

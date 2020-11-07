@@ -10,8 +10,8 @@ $this->load->library('authentication');
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title><?= htmlspecialchars($title); ?> - Garnet DeGelder's DocMan <?= DOCMAN_VERSION ?></title>
-	<link rel="stylesheet" src="<?= html_escape(base_url('/resources/css/main.css')) ?>" />
-	<link rel="stylesheet" src="<?= html_escape(base_url('/resources/css/template.css')) ?>" />
+	<link rel="stylesheet" href="<?= html_escape(base_url('/resources/css/main.css')) ?>" />
+	<link rel="stylesheet" href="<?= html_escape(base_url('/resources/css/template.css')) ?>" />
 </head>
 
 <body>
