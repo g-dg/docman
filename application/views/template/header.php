@@ -9,7 +9,7 @@ $this->load->library('authentication');
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title><?= htmlspecialchars($title); ?> - Garnet DeGelder's DocMan <?= DOCMAN_VERSION ?></title>
+	<title><?= htmlspecialchars($title); ?> - Garnet DeGelder's DocMan v<?= htmlspecialchars(DOCMAN_VERSION) ?><?= isset($_SERVER['SERVER_NAME']) ? ' on ' . htmlspecialchars($_SERVER['SERVER_NAME']) : '' ?></title>
 	<link rel="stylesheet" href="<?= html_escape(base_url('/resources/css/main.css')) ?>" />
 	<link rel="stylesheet" href="<?= html_escape(base_url('/resources/css/template.css')) ?>" />
 </head>
