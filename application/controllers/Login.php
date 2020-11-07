@@ -31,7 +31,7 @@ class Login extends CI_Controller
 			} else {
 				$_SESSION['docman_login_result'] = 'Incorrect username or password.';
 				session_write_close();
-				redirect(rtrim($this->config->site_url(), '/') . '/login/', 'location', 303);
+				redirect(rtrim($this->config->site_url(), '/') . '/login', 'location', 303);
 			}
 		} else {
 			set_status_header(400);
@@ -47,5 +47,8 @@ class Login extends CI_Controller
 		setup_session();
 
 		$this->authentication->logout();
+
+		$this->load->helper('url');
+		redirect(rtrim($this->config->site_url(), '/') . '/login', 'location', 303);
 	}
 }
