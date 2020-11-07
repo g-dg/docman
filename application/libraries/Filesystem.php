@@ -772,7 +772,11 @@ class Filesystem
 			return false;
 		}
 
-		$entry_id = $this->get_file_db_entry_id($filename, true);
+		$entry_id = $this->get_file_db_entry_id($filename, false);
+		if (is_null($entry_id)) {
+			return basename($filename);
+		}
+
 		$name = $this->CI->db->query('SELECT "display_name" FROM "files" WHERE "id" = ?;', [$entry_id])->result_array();
 		if (isset($name[0]) && !is_null($name[0]['display_name'])) {
 			return $name[0]['display_name'];
