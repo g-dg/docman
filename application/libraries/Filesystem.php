@@ -941,7 +941,11 @@ class Filesystem
 			return false;
 		}
 
-		$entry_id = $this->get_file_db_entry_id($filename, true);
+		$entry_id = $this->get_file_db_entry_id($filename, false);
+		if (is_null($entry_id)) {
+			return [];
+		}
+
 		$tags_res = $this->CI->db->query('SELECT "tags"."id" AS "tag_id", "tags"."name" AS "tag_name", "tags"."description" AS "tag_description" FROM "tags" INNER JOIN "tagged_files" ON "tagged_files"."tag_id" = "tags"."id" WHERE "tagged_files"."file_id" = ?;', [$entry_id])->result_array();
 
 		$tags = [];
