@@ -26,7 +26,7 @@ class Browse extends CI_Controller
 
 		// check if it's a file
 		if ($this->filesystem->filetype($path) != 'dir') {
-			redirect(site_url('/file/open' . $this->url_encode_path($path)));
+			redirect(site_url('/file' . $this->url_encode_path($path)));
 			return;
 		}
 
@@ -39,19 +39,12 @@ class Browse extends CI_Controller
 		}
 
 		$files = [];
-		if (rtrim($path, '/') !== '') {
-			$files[] = [
-				'name' => '..',
-				'realname' => '..',
-				'url' => site_url('/browse' . dirname($path)),
-				'type' => 'dir',
-				'size' => $this->filesystem->filecount(dirname($path)),
-				'mtime' => $this->filesystem->filemtime(dirname($path))
-			];
-		}
+
+		$this->load->library('settings');
+		$hide_dot_files = $this->settings->get('browse.hide_hidden', true);
 
 		while (($file = $this->filesystem->readdir($dh)) !== false) {
-			if ($file !== '.' && $file !== '..') {
+			if ($file !== '.' && $file !== '..' && (!$hide_dot_files || substr($file, 0, 1) !== '.')) {
 
 				$filepath = rtrim($path, '/') . '/' . $file;
 
@@ -62,20 +55,22 @@ class Browse extends CI_Controller
 				switch ($filetype) {
 					case 'dir':
 						$displayname .= '/';
-						$url = site_url('/browse' . $filepath);
+						$url = site_url('/browse' . $this->url_encode_path($filepath));
 						$size = $this->filesystem->filecount($filepath);
 						break;
 					case 'file':
-						$url = site_url('/file' . $filepath);
+						$url = site_url('/file' . $this->url_encode_path($filepath));
 						$size = $this->filesystem->filesize($filepath);
 						break;
 					default:
-						$url = site_url('/browse' . $path);
+						$url = site_url('/browse' . $this->url_encode_path($path));
 						$size = null;
 						break;
 				}
 
 				$mtime = $this->filesystem->filemtime($filepath);
+
+				$tags = $this->filesystem->get_tags($filepath);
 
 				$files[] = [
 					'name' => $displayname,
@@ -83,18 +78,86 @@ class Browse extends CI_Controller
 					'url' => $url,
 					'type' => $filetype,
 					'size' => $size,
-					'mtime' => $mtime
+					'mtime' => $mtime,
+					'tags' => $tags,
 				];
 			}
 		}
 
 		$this->filesystem->closedir($dh);
 
-		usort($files, function ($a, $b) {
-			return strcmp($a['name'], $b['name']);
-		});
+		$sort_field = 'name';
+		$sort_order = 'asc';
+		if (isset($_SESSION['browse.sort.field'])) {
+			$sort_field = $_SESSION['browse.sort.field'];
+		}
+		if (isset($_SESSION['browse.sort.order'])) {
+			$sort_order = $_SESSION['browse.sort.order'];
+		}
+		if (isset($_GET['sort'])) {
+			$sort_field = $_GET['sort'];
+		}
+		if (isset($_GET['order'])) {
+			$sort_order = $_GET['order'];
+		}
 
-		$this->load->view('browse', ['files' => $files]);
+		$_SESSION['browse.sort.field'] = $sort_field;
+		$_SESSION['browse.sort.order'] = $sort_order;
+
+		switch ($sort_field) {
+			case 'mtime':
+				if ($sort_order == 'desc') {
+					usort($files, function ($b, $a) { // new to old
+						return $a['mtime'] - $b['mtime'];
+					});
+				} else {
+					usort($files, function ($a, $b) { // old to new
+						return $a['mtime'] - $b['mtime'];
+					});
+				}
+				break;
+			case 'size':
+				if ($sort_order == 'desc') {
+					usort($files, function ($b, $a) { // small to large
+						return $a['size'] - $b['size'];
+					});
+				} else {
+					usort($files, function ($a, $b) { // large to small
+						return $a['size'] - $b['size'];
+					});
+				}
+				break;
+			default: // name
+				if ($sort_order == 'desc') {
+					usort($files, function ($b, $a) { // Z-A
+						return strnatcasecmp($a['name'], $b['name']);
+					});
+				} else {
+					usort($files, function ($a, $b) { // A-Z
+						return strnatcasecmp($a['name'], $b['name']);
+					});
+				}
+				break;
+		}
+
+		// Add previous directory link
+		if (rtrim($path, '/') !== '') {
+			array_unshift($files, [
+				'name' => '..',
+				'realname' => '..',
+				'url' => site_url('/browse' . $this->url_encode_path(dirname($path))),
+				'type' => 'dir',
+				'size' => $this->filesystem->filecount(dirname($path)),
+				'mtime' => $this->filesystem->filemtime(dirname($path))
+			]);
+		}
+
+		$this->load->view('browse', [
+			'current_dir_link' => $this->url_encode_path($path),
+			'files' => $files,
+			'sort_field' => $sort_field,
+			'sort_order' => $sort_order
+		]);
 	}
 
 	private function url_encode_path($path)

@@ -5,9 +5,10 @@
 	<thead>
 		<tr>
 			<th>Type</th>
-			<th>Name</th>
-			<th>Size</th>
-			<th>Last Modified</th>
+			<th><a href="<?= htmlspecialchars(site_url('/browse' . $current_dir_link)) . '?sort=name&amp;order=' . ($sort_order == 'asc' ? 'desc' : 'asc') ?>">Name</a></th>
+			<th><a href="<?= htmlspecialchars(site_url('/browse' . $current_dir_link)) . '?sort=mtime&amp;order=' . ($sort_order == 'asc' ? 'desc' : 'asc') ?>">Last Modified</a></th>
+			<th><a href="<?= htmlspecialchars(site_url('/browse' . $current_dir_link)) . '?sort=size&amp;order=' . ($sort_order == 'asc' ? 'desc' : 'asc') ?>">Size</a></th>
+			<th><a href="#">Tags</a></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -15,8 +16,13 @@
 			<tr>
 				<td><?= htmlspecialchars($file['type']) ?></td>
 				<td><a href="<?= htmlspecialchars($file['url']) ?>"><?= htmlspecialchars($file['name']) ?></a></td>
-				<td><?= htmlspecialchars($file['size']) ?></td>
 				<td><?= htmlspecialchars(date('c', $file['mtime'])) ?></td>
+				<td><?= htmlspecialchars($file['size']) ?></td>
+				<td>
+					<?php foreach($file['tags'] as $tag) { ?>
+						<?= htmlspecialchars($tag['tag_name']); ?>
+					<?php } ?>
+				</td>
 			</tr>
 		<?php } ?>
 	</tbody>
