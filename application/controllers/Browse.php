@@ -40,6 +40,8 @@ class Browse extends CI_Controller
 
 		$files = [];
 
+		$this->load->helper('mime_types');
+
 		$this->load->library('settings');
 		$hide_dot_files = $this->settings->get('browse.hide_hidden', true);
 
@@ -72,6 +74,25 @@ class Browse extends CI_Controller
 
 				$tags = $this->filesystem->get_tags($filepath);
 
+				
+				$mimetype = 'unknown/unknown';
+				$pathinfo = pathinfo($filepath);
+				if (isset($pathinfo['extension'])) {
+					$mimetype = get_mimetype_for_extension($pathinfo['extension']);
+				}
+				$exploded_mimetype = explode('/', $mimetype, 2);
+				$basetype = 'unknown';
+				if (isset($exploded_mimetype[0])) {
+					$basetype = $exploded_mimetype[0];
+				} else {
+					$basetype = 'unknown';
+				}
+
+				if ($filetype == 'dir') {
+					$mimetype = 'inode/directory';
+					$basetype = 'directory';
+				}
+
 				$files[] = [
 					'name' => $displayname,
 					'realname' => $file,
@@ -80,6 +101,8 @@ class Browse extends CI_Controller
 					'size' => $size,
 					'mtime' => $mtime,
 					'tags' => $tags,
+					'mimetype' => $mimetype,
+					'basetype' => $basetype
 				];
 			}
 		}
@@ -148,7 +171,10 @@ class Browse extends CI_Controller
 				'url' => site_url('/browse' . $this->url_encode_path(dirname($path))),
 				'type' => 'dir',
 				'size' => $this->filesystem->filecount(dirname($path)),
-				'mtime' => $this->filesystem->filemtime(dirname($path))
+				'mtime' => $this->filesystem->filemtime(dirname($path)),
+				'tags' => [],
+				'mimetype' => 'inode/directory',
+				'basetype' => 'directory'
 			]);
 		}
 
