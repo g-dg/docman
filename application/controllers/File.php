@@ -56,7 +56,12 @@ class File extends CI_Controller
 
 		$pathinfo = pathinfo($path);
 		if (isset($pathinfo['extension'])) {
-			header('Content-Type: ' . get_mimetype_for_extension($pathinfo['extension']));
+			$mimetype = get_mimetype_for_extension($pathinfo['extension']);
+			if (!is_null($mimetype)) {
+				header('Content-Type: ' . $mimetype);
+			} else {
+				header('Content-Type: application/octet-stream');
+			}
 		} else {
 			header('Content-Type: application/octet-stream');
 		}
