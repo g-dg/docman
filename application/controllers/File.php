@@ -3,8 +3,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class File extends CI_Controller
 {
-	private $mimetypes = [];
-
 	public function open()
 	{
 		$path_array = func_get_args();
@@ -30,31 +28,6 @@ class File extends CI_Controller
 	}
 
 	/**
-	 * Updates mimetypes property with types in ./resources/mime.types
-	 */
-	private function update_mimetypes()
-	{
-		$types_file = @file('./resources/mime.types');
-		if ($types_file === false) {
-			log_message('error', 'File "resources/mime.types" not present.');
-			return false;
-		}
-
-		foreach ($types_file as $line) {
-			$line = trim($line);
-			if (strlen($line) > 0 && substr($line, 0, 1) !== '#') {
-				$extensions = preg_split('/\s+/', $line, -1, PREG_SPLIT_NO_EMPTY);
-				if (count($extensions) > 0) {
-					$type = array_shift($extensions);
-					foreach ($extensions as $extension) {
-						$this->mimetypes[$extension] = $type;
-					}
-				}
-			}
-		}
-	}
-
-	/**
 	 * Sends a file to the client, supporting HTTP range requests
 	 * Does not currently work properly with files > 2GB on 32-bit systems
 	 * //TODO: Ensure full compliance (currently only partially compliant)
@@ -75,15 +48,15 @@ class File extends CI_Controller
 			return;
 		}
 
-		$this->update_mimetypes();
+		$this->load->helper('mime_types');
 
 		ob_end_clean();
 
 		header('Accept-Ranges: bytes');
 
 		$pathinfo = pathinfo($path);
-		if (isset($pathinfo['extension']) && isset($this->mimetypes[$pathinfo['extension']])) {
-			header('Content-Type: ' . $this->mimetypes[$pathinfo['extension']]);
+		if (isset($pathinfo['extension'])) {
+			header('Content-Type: ' . get_mimetype_for_extension($pathinfo['extension']));
 		} else {
 			header('Content-Type: application/octet-stream');
 		}
