@@ -6,11 +6,11 @@ $GLOBALS['mimetypes'] = [];
 /**
  * Updates mimetypes property with types in ./resources/mime.types
  */
-function get_mimetype_for_extension($extension)
+function get_mimetype_for_extension($test_extension)
 {
 	global $mimetypes;
 
-	if (count($mimetypes) < 0) {
+	if (count($mimetypes) == 0) {
 
 		$types_file = @file('./resources/mime.types');
 		if ($types_file === false) {
@@ -32,9 +32,9 @@ function get_mimetype_for_extension($extension)
 		}
 	}
 
-	if (isset($mimetypes[$extension])) {
-		return $mimetypes[$extension];
+	if (isset($mimetypes[$test_extension])) {
+		return $mimetypes[$test_extension];
 	} else {
-		return 'application/octet-stream';
+		return null;
 	}
 }
