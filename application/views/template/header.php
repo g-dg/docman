@@ -16,10 +16,15 @@ $this->load->library('authentication');
 
 <body>
 	<header>
+		<h1><?= htmlspecialchars($title); ?></h1>
 		<ul>
 			<li><a href="<?= html_escape(site_url('/browse')) ?>">Browse</a></li>
+			<?php if ($this->authentication->get_current_user_type() === 'admin') { ?>
+				<li><a href="<?= html_escape(site_url('/admin')) ?>">Administration</a></li>
+			<?php } ?>
 			<li>Logged in as <?= htmlspecialchars($this->authentication->get_current_username()) ?></li>
 			<li><a href="<?= html_escape(site_url('/login/logout')) ?>">Log out</a></li>
 		</ul>
+		<div style="clear:both;">
 	</header>
 	<main>
