@@ -56,3 +56,6 @@ $route['translate_uri_dashes'] = FALSE;
 $route['browse/(.*)'] = 'browse/index/$1';
 $route['file/(.*)'] = 'file/open/$1';
 $route['download/(.*)'] = 'file/download/$1';
+$route['search/(.*)'] = 'search/index/$1';
+$route['filter/(.*)'] = 'filter/index/$1';
+$route['properties/(.*)'] = 'properties/index/$1';
