@@ -180,9 +180,10 @@ class Browse extends CI_Controller
 
 		$this->load->view('browse', [
 			'current_dir_link' => $this->url_encode_path($path),
+			'title' => basename($path),
 			'files' => $files,
 			'sort_field' => $sort_field,
-			'sort_order' => $sort_order
+			'sort_order' => $sort_order,
 		]);
 	}
 
