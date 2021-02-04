@@ -99,7 +99,7 @@ class FilesystemDatabaseDriver implements IFilesystemDriver
 
 	// OLD
 	public function getStoragePath($path) {
-		$entry_id = $this->getFileEntryId($path, true);
+		/*$entry_id = $this->getFileEntryId($path, true);
 
 		$file_info_result = $this->CI->db->query('SELECT "mountpoint_driver_info" FROM "files" WHERE "id" = ?;', [$entry_id])->result_array();
 
@@ -118,7 +118,7 @@ class FilesystemDatabaseDriver implements IFilesystemDriver
 			$this->CI->db->query('UPDATE "files" SET "mountpoint_driver_info" = ? WHERE "id" = ?;', [json_encode($file_info), $file_id]);
 		}
 
-		return ($this->CI->filesystem->sanitize_path($this->storage_path) . $this->CI->filesystem->sanitize_path($file_info['database']['storage_filename']));
+		return ($this->CI->filesystem->sanitize_path($this->storage_path) . $this->CI->filesystem->sanitize_path($file_info['database']['storage_filename']));*/
 	}
 
 	public function mount()
