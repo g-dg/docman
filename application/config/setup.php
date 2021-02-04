@@ -6,3 +6,4 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 $config['docman_default_username'] = 'admin';
 $config['docman_default_password'] = 'password';
+$config['docman_default_data_directory'] = './data/';
