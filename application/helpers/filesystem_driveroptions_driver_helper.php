@@ -71,11 +71,18 @@ class FilesystemDriverOptionsDriver implements IFilesystemDriver
 	private $CI;
 	public $writable = false;
 	public $mountpoint_id;
+	private $filesystem;
 	public function __construct($driver_name, $driver_options, $mountpoint_id)
 	{
 		$this->CI = &get_instance();
 		$this->writable = ($driver_name == 'driver_options_writable');
 		$this->mountpoint_id = $mountpoint_id;
+
+		$this->filesystem = json_decode($driver_options, true);
+		$json_last_error = json_last_error();
+		if ($json_last_error !== JSON_ERROR_NONE) {
+			throw new Exception('Corrupt in-database filesystem for mountpoint # ' . $mountpoint_id . '. (error decoding JSON)');
+		}
 	}
 
 	public function mount()
