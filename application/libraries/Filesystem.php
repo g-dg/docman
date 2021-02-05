@@ -229,6 +229,25 @@ class Filesystem
 	}
 
 	/**
+	 * Gets or creates the db entry of a file from its internal path
+	 * Designed to be used by fs drivers
+	 * @param mountpoint_id The mountpoint ID
+	 * @param internal_path The internal path in the mountpoint
+	 * @param create Creates the file entry with default values if it doesn't yet exist
+	 */
+	public function get_internal_file_entry_id($mountpoint_id, $internal_path, $create = false)
+	{
+		$result = $this->CI->db->query('SELECT "id", "destination_path" FROM "mountpoints" WHERE "mountpoint_id" = ?;', [$mountpoint_id]);
+		
+		if (isset($result[0])) {
+			$full_path = $result[0]['destination_path'] . $internal_path;
+			return $this->get_file_db_entry_id($full_path, $create, false);
+		} else {
+			return false;
+		}
+	}
+
+	/**
 	 * Gets an array with the file db entries from highest to lowest specificity
 	 */
 	public function get_parent_file_db_entry_ids($full_path)
