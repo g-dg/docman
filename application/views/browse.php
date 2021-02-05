@@ -15,7 +15,8 @@
 			<th><a href="<?= htmlspecialchars(site_url('/browse' . $current_dir_link)) . '?sort=name&amp;order=' . ($sort_order == 'asc' ? 'desc' : 'asc') ?>">Name</a></th>
 			<th><a href="<?= htmlspecialchars(site_url('/browse' . $current_dir_link)) . '?sort=mtime&amp;order=' . ($sort_order == 'asc' ? 'desc' : 'asc') ?>">Last Modified</a></th>
 			<th><a href="<?= htmlspecialchars(site_url('/browse' . $current_dir_link)) . '?sort=size&amp;order=' . ($sort_order == 'asc' ? 'desc' : 'asc') ?>">Size</a></th>
-			<th><a href="#">Tags</a></th>
+			<th>Tags</th>
+			<th></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -30,6 +31,7 @@
 						<?= htmlspecialchars($tag['tag_name']); ?>
 					<?php } ?>
 				</td>
+				<td><a href="<?= htmlspecialchars($file['properties_url']) ?>">Properties</a></td>
 			</tr>
 		<?php } ?>
 	</tbody>

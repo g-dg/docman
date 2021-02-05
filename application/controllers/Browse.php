@@ -96,13 +96,15 @@ class Browse extends CI_Controller
 				$files[] = [
 					'name' => $displayname,
 					'realname' => $file,
+					'path' => $filepath,
 					'url' => $url,
 					'type' => $filetype,
 					'size' => $size,
 					'mtime' => $mtime,
 					'tags' => $tags,
 					'mimetype' => $mimetype,
-					'basetype' => $basetype
+					'basetype' => $basetype,
+					'properties_url' => site_url('/properties' . $this->url_encode_path($filepath))
 				];
 			}
 		}
@@ -168,13 +170,15 @@ class Browse extends CI_Controller
 			array_unshift($files, [
 				'name' => '..',
 				'realname' => '..',
+				'path' => dirname($path),
 				'url' => site_url('/browse' . $this->url_encode_path(dirname($path))),
 				'type' => 'dir',
 				'size' => $this->filesystem->filecount(dirname($path)),
 				'mtime' => $this->filesystem->filemtime(dirname($path)),
 				'tags' => [],
 				'mimetype' => 'inode/directory',
-				'basetype' => 'directory'
+				'basetype' => 'directory',
+				'properties_url' => site_url('/properties' . $this->url_encode_path(dirname($path)))
 			]);
 		}
 
