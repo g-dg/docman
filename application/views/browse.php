@@ -1,11 +1,18 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <?php $this->load->view('template/header', ['title' => (trim($title) !== '' ? $title . ' - Browse' : 'Browse' )]); ?>
 
-<form action="<?= html_escape($this->config->site_url('/search' . $current_dir_link)); ?>" method="POST">
+<form action="<?= html_escape($this->config->site_url('/search' . $current_dir_link)); ?>" method="POST" style="display: inline;">
 	<input name="_csrf_token" value="<?= html_escape(get_csrf_token()); ?>" type="hidden" />
 	<input type="search" name="q" value="" placeholder="Search" ?>
 	<input type="submit" value="Search" />
 	<a href="<?= html_escape($this->config->site_url('/filter' . $current_dir_link)); ?>">Filter</a>
+</form>
+
+<form action="<?= html_escape($this->config->site_url('/upload' . $current_dir_link)); ?>" enctype="multipart/form-data" method="POST" style="display: inline;">
+	<input name="_csrf_token" value="<?= html_escape(get_csrf_token()); ?>" type="hidden" />
+	<label for="upload_file">Upload:</label>
+	<input id="upload_file" name="file" type="file" required="required" />
+	<input type="submit" value="Upload" />
 </form>
 
 <table>
@@ -23,7 +30,7 @@
 		<?php foreach ($files as $file) { ?>
 			<tr>
 				<td><?= htmlspecialchars($file['basetype']) ?></td>
-				<td><a href="<?= htmlspecialchars($file['url']) ?>"><?= htmlspecialchars($file['name']) ?></a></td>
+				<td><a href="<?= htmlspecialchars($file['url']) ?>"<?= ($file['type'] != 'dir') ? ' target="_blank"' : '' ?>><?= htmlspecialchars($file['name']) ?></a></td>
 				<td><?= htmlspecialchars(date('c', $file['mtime'])) ?></td>
 				<td><?= htmlspecialchars($file['size']) ?></td>
 				<td>
