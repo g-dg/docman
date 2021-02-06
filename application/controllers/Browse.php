@@ -78,7 +78,7 @@ class Browse extends CI_Controller
 				$mimetype = 'unknown/unknown';
 				$pathinfo = pathinfo($filepath);
 				if (isset($pathinfo['extension'])) {
-					$mimetype = get_mimetype_for_extension($pathinfo['extension']);
+					$mimetype = get_mimetype_for_extension(strtolower($pathinfo['extension']));
 				}
 				$exploded_mimetype = explode('/', $mimetype, 2);
 				$basetype = 'unknown';
@@ -168,7 +168,7 @@ class Browse extends CI_Controller
 		// Add previous directory link
 		if (rtrim($path, '/') !== '') {
 			array_unshift($files, [
-				'name' => '..',
+				'name' => '<- Parent Folder',
 				'realname' => '..',
 				'path' => dirname($path),
 				'url' => site_url('/browse' . $this->url_encode_path(dirname($path))),
