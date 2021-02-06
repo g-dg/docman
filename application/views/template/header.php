@@ -25,6 +25,6 @@ $this->load->library('authentication');
 			<li>Logged in as <?= htmlspecialchars($this->authentication->get_current_username()) ?></li>
 			<li><a href="<?= html_escape(site_url('/login/logout')) ?>">Log out</a></li>
 		</ul>
-		<div style="clear:both;">
+		<div style="clear:both;"></div>
 	</header>
 	<main>
