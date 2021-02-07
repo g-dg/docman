@@ -54,6 +54,8 @@ class Properties extends CI_Controller
 
 							if ($_SESSION['clipboard_mode'] == 'move') {
 								if ($this->filesystem->move($_SESSION['clipboard_file'], rtrim($path, '/') . '/' . basename($_SESSION['clipboard_file']))) {
+									$_SESSION['clipboard_file'] = rtrim($path, '/') . '/' . basename($_SESSION['clipboard_file']);
+									$_SESSION['clipboard_mode'] = 'copy';
 									redirect($this->config->site_url('/properties' . $path));
 								} else {
 									log_message('error', 'Error moving file "' . $_SESSION['clipboard_file'] . '" to "' . rtrim($path, '/') . '/' . basename($_SESSION['clipboard_file']) . '"');
@@ -97,7 +99,7 @@ class Properties extends CI_Controller
 				'friendly_name' => $friendly_name,
 				'allow_cut' => $writable,
 				'allow_copy' => true,
-				'allow_paste' => $writable && $file_type == 'dir',
+				'allow_paste' => isset($_SESSION['clipboard_file']) && $writable && $file_type == 'dir',
 				'allow_rename' => $writable,
 				'allow_delete' => $writable
 			]);
