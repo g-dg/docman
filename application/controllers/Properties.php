@@ -19,6 +19,86 @@ class Properties extends CI_Controller
 
 		$this->load->library('filesystem');
 
+		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+			if (isset($_POST['_csrf_token'], $_GET['action']) && check_csrf_token($_POST['_csrf_token'])) {
+
+				switch ($_GET['action']) {
+					case 'set_display_name':
+						if (isset($_POST['new_display_name'])) {
+							$this->filesystem->set_display_name($path, $_POST['new_display_name']);
+						} else {
+							set_status_header(400);
+							return;
+						}
+						redirect($this->config->site_url('/properties' . $path));
+						break;
+
+					case 'cut':
+						$_SESSION['clipboard_file'] = $path;
+						$_SESSION['clipboard_mode'] = 'move';
+						redirect($this->config->site_url('/properties' . $path));
+						break;
+					case 'copy':
+						$_SESSION['clipboard_file'] = $path;
+						$_SESSION['clipboard_mode'] = 'copy';
+						redirect($this->config->site_url('/properties' . $path));
+						break;
+					case 'paste':
+						if (isset($_SESSION['clipboard_file'], $_SESSION['clipboard_mode'])) {
+							if ($this->filesystem->filetype($path) != 'dir') {
+								// only paste into a directory
+								redirect($this->config->site_url('/properties' . $path));
+								return;
+							}
+
+							if ($_SESSION['clipboard_mode'] == 'move') {
+								if ($this->filesystem->move($_SESSION['clipboard_file'], rtrim($path, '/') . '/' . basename($_SESSION['clipboard_file']))) {
+									redirect($this->config->site_url('/properties' . $path));
+								} else {
+									log_message('error', 'Error moving file "' . $_SESSION['clipboard_file'] . '" to "' . rtrim($path, '/') . '/' . basename($_SESSION['clipboard_file']) . '"');
+									echo 'An error occurred moving the file.';
+								}
+							} else {
+								if ($this->filesystem->copy($_SESSION['clipboard_file'], rtrim($path, '/') . '/' . basename($_SESSION['clipboard_file']))) {
+									redirect($this->config->site_url('/properties' . $path));
+								} else {
+									log_message('error', 'Error copy file "' . $_SESSION['clipboard_file'] . '" to "' . rtrim($path, '/') . '/' . basename($_SESSION['clipboard_file']) . '"');
+									echo 'An error occurred copy the file.';
+								}
+							}
+						}
+						break;
+
+					case 'delete':
+						$this->filesystem->unlink($path);
+						redirect($this->config->site_url('/browse' . dirname($path)));
+						break;
+
+				}
+
+			} else {
+				set_status_header(403);
+				return;
+			}
+
+		} else {
+			// display view
+
+			$friendly_name = $this->filesystem->get_display_name($path);
+
+			$file_type = $this->filesystem->filetype($path);
+			$writable = $this->filesystem->is_writable($path);
+
+			$this->load->view('properties', [
+				'title' => $friendly_name,
+				'file_path' => $path,
+				'current_dir_link' => dirname($path),
+				'friendly_name' => $friendly_name,
+				'allow_cut' => $writable,
+				'allow_paste' => $writable && $file_type == 'dir',
+			]);
+		}
 	}
 
 	private function url_encode_path($path)
