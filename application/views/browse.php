@@ -3,11 +3,25 @@
 
 <form action="<?= html_escape($this->config->site_url('/search' . $current_dir_link)); ?>" method="POST" style="display: inline;">
 	<input name="_csrf_token" value="<?= html_escape(get_csrf_token()); ?>" type="hidden" />
-	<input type="search" name="q" value="" placeholder="Search" ?>
+	<label for="search">Search:</label>
+	<input id="search" type="search" name="q" value="" placeholder="Search" ?>
 	<input type="submit" value="Search" />
 </form>
 |
-<a href="<?= html_escape($this->config->site_url('/filter' . $current_dir_link)); ?>">Filter</a>
+<form action="<?= html_escape($this->config->site_url('/filter' . $current_dir_link)); ?>" method="POST" style="display: inline;">
+	<input name="_csrf_token" value="<?= html_escape(get_csrf_token()); ?>" type="hidden" />
+	<label for="filter">Filter:</label>
+	<select id="filter" name="filter">
+		<option value=""<?= !isset($_SESSION['filter']) ? ' selected="selected"' : '' ?>>Everything</option>
+		<option value="directory"<?= (isset($_SESSION['filter']) && $_SESSION['filter'] == 'directory') ? ' selected="selected"' : '' ?>>Folders only</option>
+		<option value="text"<?= (isset($_SESSION['filter']) && $_SESSION['filter'] == 'text') ? ' selected="selected"' : '' ?>>Text files</option>
+		<option value="image"<?= (isset($_SESSION['filter']) && $_SESSION['filter'] == 'image') ? ' selected="selected"' : '' ?>>Pictures</option>
+		<option value="audio"<?= (isset($_SESSION['filter']) && $_SESSION['filter'] == 'audio') ? ' selected="selected"' : '' ?>>Audio</option>
+		<option value="video"<?= (isset($_SESSION['filter']) && $_SESSION['filter'] == 'video') ? ' selected="selected"' : '' ?>>Video</option>
+		<option value="application"<?= (isset($_SESSION['filter']) && $_SESSION['filter'] == 'application') ? ' selected="selected"' : '' ?>>Application files</option>
+	</select>
+	<input type="submit" value="Filter" />
+</form>
 |
 <form action="<?= html_escape($this->config->site_url('/upload' . $current_dir_link)); ?>" enctype="multipart/form-data" method="POST" style="display: inline;">
 	<input name="_csrf_token" value="<?= html_escape(get_csrf_token()); ?>" type="hidden" />

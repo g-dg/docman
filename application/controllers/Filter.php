@@ -19,6 +19,21 @@ class Filter extends CI_Controller
 
 		$this->load->library('filesystem');
 
+		if (isset($_POST['_csrf_token']) && check_csrf_token($_POST['_csrf_token'])) {
+			if (isset($_POST['filter'])) {
+				if (trim($_POST['filter']) !== '') {
+					$_SESSION['filter'] = $_POST['filter'];
+				} else {
+					unset($_SESSION['filter']);
+				}
+
+				redirect(site_url('/browse' . $this->url_encode_path($path)));
+			} else {
+				set_status_header(400);
+			}
+		} else {
+			set_status_header(403);
+		}
 	}
 
 	private function url_encode_path($path)

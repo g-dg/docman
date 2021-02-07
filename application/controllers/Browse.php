@@ -45,6 +45,7 @@ class Browse extends CI_Controller
 		$this->load->library('settings');
 		$hide_dot_files = $this->settings->get('browse.hide_hidden', true);
 
+		// add files to list
 		while (($file = $this->filesystem->readdir($dh)) !== false) {
 			if ($file !== '.' && $file !== '..' && (!$hide_dot_files || substr($file, 0, 1) !== '.')) {
 
@@ -93,19 +94,22 @@ class Browse extends CI_Controller
 					$basetype = 'directory';
 				}
 
-				$files[] = [
-					'name' => $displayname,
-					'realname' => $file,
-					'path' => $filepath,
-					'url' => $url,
-					'type' => $filetype,
-					'size' => $size,
-					'mtime' => $mtime,
-					'tags' => $tags,
-					'mimetype' => $mimetype,
-					'basetype' => $basetype,
-					'properties_url' => site_url('/properties' . $this->url_encode_path($filepath))
-				];
+				// check if we are excluding based on filtering
+				if (!isset($_SESSION['filter']) || $basetype == 'directory' || $basetype == $_SESSION['filter']) {
+					$files[] = [
+						'name' => $displayname,
+						'realname' => $file,
+						'path' => $filepath,
+						'url' => $url,
+						'type' => $filetype,
+						'size' => $size,
+						'mtime' => $mtime,
+						'tags' => $tags,
+						'mimetype' => $mimetype,
+						'basetype' => $basetype,
+						'properties_url' => site_url('/properties' . $this->url_encode_path($filepath))
+					];
+				}
 			}
 		}
 
