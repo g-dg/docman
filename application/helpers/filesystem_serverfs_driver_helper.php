@@ -84,7 +84,11 @@ class FilesystemServerFSFileHandle implements IFilesystemFileHandle
 	}
 	public function fwrite($string, $length = null)
 	{
-		return fwrite($this->fh, $string, $length);
+		if (is_null($length)) {
+			return fwrite($this->fh, $string);
+		} else {
+			return fwrite($this->fh, $string, $length);
+		}
 	}
 	public function feof()
 	{
