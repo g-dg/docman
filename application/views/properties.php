@@ -35,7 +35,7 @@
 <?php if ($allow_delete) : ?>
 	<form action="<?= html_escape($this->config->site_url('/properties' . $file_path)); ?>?action=paste" method="POST">
 		<input name="_csrf_token" value="<?= html_escape(get_csrf_token()); ?>" type="hidden" />
-		<input type="submit" value="Delete" onclick="return confirm(&quot;Really delete?&quot;);" />
+		<input type="submit" value="Delete" onclick='return confirm("Really delete?");' />
 	</form>
 <?php endif ?>
 
