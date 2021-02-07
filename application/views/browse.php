@@ -5,9 +5,10 @@
 	<input name="_csrf_token" value="<?= html_escape(get_csrf_token()); ?>" type="hidden" />
 	<input type="search" name="q" value="" placeholder="Search" ?>
 	<input type="submit" value="Search" />
-	<a href="<?= html_escape($this->config->site_url('/filter' . $current_dir_link)); ?>">Filter</a>
 </form>
-
+|
+<a href="<?= html_escape($this->config->site_url('/filter' . $current_dir_link)); ?>">Filter</a>
+|
 <form action="<?= html_escape($this->config->site_url('/upload' . $current_dir_link)); ?>" enctype="multipart/form-data" method="POST" style="display: inline;">
 	<input name="_csrf_token" value="<?= html_escape(get_csrf_token()); ?>" type="hidden" />
 	<label for="upload_file">Upload:</label>
@@ -38,7 +39,7 @@
 						<?= htmlspecialchars($tag['tag_name']); ?>
 					<?php } ?>
 				</td>
-				<td><a href="<?= htmlspecialchars($file['properties_url']) ?>">Properties</a></td>
+				<td><?php if ($file['realname'] != '..'): ?><a href="<?= htmlspecialchars($file['properties_url']) ?>">Properties</a><?php endif ?></td>
 			</tr>
 		<?php } ?>
 	</tbody>
