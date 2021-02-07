@@ -395,7 +395,7 @@ class Filesystem
 			return false;
 		}
 
-		if ($this->filetype($path) != 'file') {
+		if ($this->file_exists($path) && $this->filetype($path) != 'file') {
 			log_message('error', 'User "' . $this->CI->authentication->get_current_username() . '" attempted to open "' . $path . '" as a file while it is not a file.');
 			return false;
 		}
@@ -1023,7 +1023,7 @@ interface IFilesystemDirectoryHandle
 
 	/**
 	 * Opens a directory for reading with readdir
-	 * @return IDirectoryHandle
+	 * @return IFilesystemDirectoryHandle
 	 */
 	public function opendir($path);
 
@@ -1048,7 +1048,7 @@ interface IFilesystemFileHandle
 	/**
 	 * Opens a file for reading and writing with fread() and fwrite() and seeking with fseek() and rewind()
 	 * Mode may only be 'r', 'w', 'r+', 'w+', 'a', 'a+'
-	 * @return IDirectory
+	 * @return IFilesystemFileHandle
 	 */
 	public function fopen($path, $mode);
 
