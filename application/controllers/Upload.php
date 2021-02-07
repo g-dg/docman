@@ -21,6 +21,11 @@ class Upload extends CI_Controller
 
 		// process upload
 
+		if (!isset($_POST['_csrf_token'], $_GET['action']) || !check_csrf_token($_POST['_csrf_token'])) {
+			set_status_header(403);
+			return;
+		}
+
 		if (!isset($_FILES['file'])) {
 			set_status_header(400);
 			return;
