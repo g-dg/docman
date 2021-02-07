@@ -96,7 +96,10 @@ class Properties extends CI_Controller
 				'current_dir_link' => dirname($path),
 				'friendly_name' => $friendly_name,
 				'allow_cut' => $writable,
+				'allow_copy' => true,
 				'allow_paste' => $writable && $file_type == 'dir',
+				'allow_rename' => $writable,
+				'allow_delete' => $writable
 			]);
 		}
 	}
