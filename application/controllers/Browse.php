@@ -38,6 +38,8 @@ class Browse extends CI_Controller
 			return;
 		}
 
+		$writable = $this->filesystem->is_writable($path);
+
 		$files = [];
 
 		$this->load->helper('mime_types');
@@ -192,6 +194,7 @@ class Browse extends CI_Controller
 			'files' => $files,
 			'sort_field' => $sort_field,
 			'sort_order' => $sort_order,
+			'writable' => $writable
 		]);
 	}
 

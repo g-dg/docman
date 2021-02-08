@@ -22,6 +22,7 @@ $this->load->library('authentication');
 			<?php if ($this->authentication->get_current_user_type() === 'admin') { ?>
 				<li><a href="<?= html_escape(site_url('/admin')) ?>">Administration</a></li>
 			<?php } ?>
+			<li><a href="<?= html_escape(site_url('/settings')) ?>">My Account</a></li>
 			<li>Logged in as <?= htmlspecialchars($this->authentication->get_current_username()) ?></li>
 			<li><a href="<?= html_escape(site_url('/login/logout')) ?>">Log out</a></li>
 		</ul>

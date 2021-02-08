@@ -45,7 +45,7 @@ class Setup extends CI_Controller {
 				]);
 				$mountpoint_id = $this->db->insert_id();
 
-				$this->db->query('INSERT INTO "files" ("mountpoint_id", "path_in_mountpoint", "display_name", "owner_user_id", "mountpoint_driver_info") VALUES (?, \'/\', NULL, ?, \'{}\')', [
+				$this->db->query('INSERT INTO "files" ("mountpoint_id", "path_in_mountpoint", "display_name", "owner_user_id", "mountpoint_driver_info") VALUES (?, \'/\', NULL, ?, \'{"_root":true}\')', [
 					$mountpoint_id,
 					$user_id,
 				]);
